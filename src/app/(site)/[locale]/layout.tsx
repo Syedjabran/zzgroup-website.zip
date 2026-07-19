@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Inter, Noto_Nastaliq_Urdu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { isLocale, dir, type Locale } from '@/lib/i18n';
+import SiteHeader from '@/components/SiteHeader';
+import SiteFooter from '@/components/SiteFooter';
 import '../../globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -22,7 +24,6 @@ export const metadata: Metadata = {
     'Explore frame mouldings, framing accessories, fluted wall panels, WPC cladding and architectural décor from ZZ Group. Request wholesale pricing and delivery across Pakistan.'
 };
 
-// Pre-render both locales.
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'ur' }];
 }
@@ -36,13 +37,15 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const loc = locale as Locale;
 
-  // Setting lang + dir on <html> flips the ENTIRE interface for Urdu.
   return (
-    <html lang={locale} dir={dir(locale as Locale)} className={`${inter.variable} ${urdu.variable}`}>
+    <html lang={locale} dir={dir(loc)} className={`${inter.variable} ${urdu.variable}`}>
       <body>
         <a href="#main" className="skip-link">Skip to content</a>
+        <SiteHeader locale={loc} />
         <main id="main">{children}</main>
+        <SiteFooter locale={loc} />
       </body>
     </html>
   );
