@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next
+.next/
+out/
+build/
+next-env.d.ts
+
+# env — everything except the template
+.env
+.env.*
+!.env.example
+
+# supabase local
+supabase/.branches
+supabase/.temp
+.supabase/
+
+# testing / misc
+coverage/
+playwright-report/
+test-results/
+.DS_Store
+*.log
+.vercel
