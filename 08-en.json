@@ -1,0 +1,57 @@
+{
+  "locale": "en",
+  "dir": "ltr",
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "products": "Products",
+    "zzmolding": "ZZMOLDING",
+    "zzdecor": "ZZDECOR",
+    "gallery": "Project Gallery",
+    "contact": "Contact Us",
+    "faqs": "FAQs"
+  },
+  "actions": {
+    "searchProducts": "Search Products",
+    "whatsappUs": "WhatsApp Us",
+    "requestQuote": "Request a Quotation",
+    "requestBulkQuote": "Request a Bulk Quotation",
+    "explore": "Explore Our Products",
+    "chatSales": "Chat with Our Sales Team",
+    "learnMore": "Learn More About ZZ Group",
+    "clearFilters": "Clear Filters",
+    "quoteViaWhatsapp": "Quote via WhatsApp"
+  },
+  "topbar": {
+    "delivery": "Reliable Delivery Across Pakistan"
+  },
+  "availability": {
+    "confirm": "Contact us to confirm."
+  },
+  "footer": {
+    "about": "ZZ Group supplies a growing collection of frame mouldings, framing accessories, wall panels and architectural décor products for professional and project requirements across Pakistan.",
+    "disclaimer": "Product colours and finishes may appear slightly different because of photography, lighting and screen settings. Dimensions, specifications, prices and availability should be confirmed before placing an order.",
+    "rights": "All rights reserved."
+  },
+  "form": {
+    "fullName": "Full Name",
+    "company": "Company or Shop Name",
+    "phone": "Phone / WhatsApp Number",
+    "email": "Email Address",
+    "city": "City",
+    "customerType": "Customer Type",
+    "productInterest": "Product Interest",
+    "sku": "Product SKU",
+    "material": "Preferred Material",
+    "colour": "Preferred Colour / Finish",
+    "dimensions": "Required Dimensions",
+    "quantity": "Required Quantity / Project Area",
+    "upload": "Upload Reference Image",
+    "message": "Message / Additional Requirements",
+    "consent": "I agree to be contacted about my enquiry.",
+    "submit": "Send Enquiry",
+    "success": "Thank you. Your enquiry has been received. Our sales team will review your requirements and contact you using the information provided.",
+    "error": "We could not send your enquiry. Please try again or contact us directly on WhatsApp."
+  },
+  "productNotice": "Product colour and finish may appear slightly different due to lighting, photography and screen settings. Specifications, stock, pricing and delivery information must be confirmed before ordering."
+}
