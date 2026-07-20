@@ -28,10 +28,10 @@ export const metadata: Metadata = {
   },
   description:
     "Pakistan's premium architectural mouldings, wall panels and decorative surfaces brand. Frame mouldings, fluted panels, WPC cladding and interior finishing for residential, commercial and hospitality projects.",
-  icons: { icon: '/logo.jpg', apple: '/logo.jpg' },
+  icons: { icon: '/logo.png', apple: '/logo.png' },
   openGraph: {
     siteName: 'ZZ GROUP',
-    images: ['/logo.jpg']
+    images: ['/logo.png']
   }
 };
 
