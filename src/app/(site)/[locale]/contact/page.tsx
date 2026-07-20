@@ -21,7 +21,7 @@ export default async function Contact({
         <p style={{ color: 'var(--grey)' }}>
           Shop No. 2, Kashif Center, Mission Road, Lahore, Pakistan<br /><br />
           {ur ? 'فون / واٹس ایپ' : 'Phone / WhatsApp'}: +92 333 4813016<br />
-          {ur ? 'ای میل' : 'Email'}: zzshopmoulding@gmail.com
+          {ur ? 'ای میل' : 'Email'}: contact@zzgroup.biz
         </p>
         <a href="https://share.google/SmXyo6uKvLxnf4j8J" target="_blank" rel="noopener noreferrer" className="btn-secondary">
           {ur ? 'نقشے پر دیکھیں' : 'View on Map'}
