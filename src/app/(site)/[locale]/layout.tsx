@@ -1,12 +1,18 @@
 import type { Metadata } from 'next';
-import { Inter, Noto_Nastaliq_Urdu } from 'next/font/google';
+import { Manrope, Cormorant_Garamond, Noto_Nastaliq_Urdu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { isLocale, dir, type Locale } from '@/lib/i18n';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import '../../globals.css';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
+const manrope = Manrope({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-display',
+  display: 'swap'
+});
 const urdu = Noto_Nastaliq_Urdu({
   subsets: ['arabic'],
   weight: ['400', '500', '700'],
@@ -17,11 +23,16 @@ const urdu = Noto_Nastaliq_Urdu({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.zzgroup.biz'),
   title: {
-    default: 'Frame Mouldings, Wall Panels & Décor in Pakistan | ZZ Group',
-    template: '%s | ZZ Group'
+    default: "Premium Frame Mouldings, Wall Panels & Decorative Surfaces | ZZ GROUP",
+    template: '%s | ZZ GROUP'
   },
   description:
-    'Explore frame mouldings, framing accessories, fluted wall panels, WPC cladding and architectural décor from ZZ Group. Request wholesale pricing and delivery across Pakistan.'
+    "Pakistan's premium architectural mouldings, wall panels and decorative surfaces brand. Frame mouldings, fluted panels, WPC cladding and interior finishing for residential, commercial and hospitality projects.",
+  icons: { icon: '/logo.jpg', apple: '/logo.jpg' },
+  openGraph: {
+    siteName: 'ZZ GROUP',
+    images: ['/logo.jpg']
+  }
 };
 
 export function generateStaticParams() {
@@ -40,7 +51,7 @@ export default async function LocaleLayout({
   const loc = locale as Locale;
 
   return (
-    <html lang={locale} dir={dir(loc)} className={`${inter.variable} ${urdu.variable}`}>
+    <html lang={locale} dir={dir(loc)} className={`${manrope.variable} ${cormorant.variable} ${urdu.variable}`}>
       <body>
         <a href="#main" className="skip-link">Skip to content</a>
         <SiteHeader locale={loc} />
