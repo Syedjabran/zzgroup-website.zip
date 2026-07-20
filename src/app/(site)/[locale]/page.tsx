@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getDictionary, isLocale, type Locale } from '@/lib/i18n';
-import { whatsappLink, generalMessage } from '@/lib/whatsapp';
+import WhatsAppButton from '@/components/WhatsAppButton';
 import { notFound } from 'next/navigation';
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
@@ -47,10 +47,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             <Link href={`${base}/contact`} className="btn-secondary" style={{ color: 'var(--zz-mineral-ivory)', borderColor: 'var(--zz-gunmetal)' }}>
               {ur ? 'ٹریڈ کوٹیشن' : 'Request Trade Quotation'}
             </Link>
-            <a href={whatsappLink(generalMessage())} target="_blank" rel="noopener noreferrer"
-              style={{ color: 'var(--whatsapp)', fontWeight: 700, alignSelf: 'center', textDecoration: 'none' }}>
-              {ur ? 'واٹس ایپ پر بات کریں' : 'Chat on WhatsApp'}
-            </a>
+            <WhatsAppButton label={ur ? 'واٹس ایپ پر بات کریں' : 'Chat on WhatsApp'} />
           </div>
         </div>
       </section>
@@ -166,10 +163,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             <Link href={`${base}/contact`} className="btn-secondary" style={{ color: 'var(--zz-mineral-ivory)', borderColor: 'var(--zz-gunmetal)' }}>
               {ur ? 'ہول سیل قیمت' : 'Request Wholesale Price'}
             </Link>
-            <a href={whatsappLink(generalMessage())} target="_blank" rel="noopener noreferrer"
-              style={{ color: 'var(--whatsapp)', fontWeight: 700, alignSelf: 'center', textDecoration: 'none' }}>
-              {ur ? 'واٹس ایپ' : 'Chat on WhatsApp'}
-            </a>
+            <WhatsAppButton label={ur ? 'واٹس ایپ' : 'Chat on WhatsApp'} />
           </div>
         </div>
       </section>
