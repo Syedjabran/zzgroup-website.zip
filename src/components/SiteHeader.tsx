@@ -25,9 +25,9 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
       <div style={{ background: 'var(--zz-carbon-black)', color: 'var(--zz-text-muted-light)', fontSize: '.78rem', letterSpacing: '.04em' }}>
         <div className="container" style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', justifyContent: 'space-between', paddingBlock: '.45rem' }}>
           <span>
-            <span style={{ color: 'var(--zz-antique-gold)' }}>✆</span> +92 333 4813016
+            <span style={{ color: 'var(--zz-antique-gold)' }}>✆</span> <span className="ltr">+92 333 4813016</span>
             <span style={{ margin: '0 .6rem', color: 'var(--zz-gunmetal)' }}>·</span>
-            contact@zzgroup.biz
+            <span className="ltr">contact@zzgroup.biz</span>
           </span>
           <span>{ur ? 'پاکستان بھر میں ترسیل دستیاب' : 'Pakistan-Wide Delivery Available'}</span>
         </div>
@@ -51,7 +51,10 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
             {nav.map((n) => (
               <Link key={n.href} href={n.href} style={{
                 color: 'var(--zz-mineral-ivory)', textDecoration: 'none',
-                fontWeight: 600, fontSize: '.82rem', letterSpacing: '.08em', textTransform: 'uppercase'
+                fontWeight: 600,
+                fontSize: ur ? '1rem' : '.82rem',
+                letterSpacing: ur ? 0 : '.08em',
+                textTransform: ur ? 'none' : 'uppercase'
               }}>
                 {n.label}
               </Link>

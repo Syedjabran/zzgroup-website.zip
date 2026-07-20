@@ -17,10 +17,9 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
     { href: `${base}/faqs`, label: t.nav.faqs }
   ];
 
-  const collections = [
-    'Frame Mouldings', 'Wall Panels', 'WPC Cladding',
-    'Marble & Onyx Panels', 'Decorative Surfaces', 'Skirting, Cornices & Trims', 'Framing Accessories'
-  ];
+  const collections = ur
+    ? ['فریم مولڈنگز', 'وال پینلز', 'ڈبلیو پی سی کلیڈنگ', 'ماربل اور اونکس پینلز', 'آرائشی سطحیں', 'اسکرٹنگ، کارنس اور ٹرِمز', 'فریمنگ لوازمات']
+    : ['Frame Mouldings', 'Wall Panels', 'WPC Cladding', 'Marble & Onyx Panels', 'Decorative Surfaces', 'Skirting, Cornices & Trims', 'Framing Accessories'];
 
   return (
     <footer style={{ background: 'var(--zz-carbon-black)', color: 'var(--zz-text-muted-light)', marginTop: '4rem' }}>
@@ -62,10 +61,10 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
         <div>
           <p className="eyebrow" style={{ marginTop: 0 }}>{ur ? 'رابطہ' : 'Contact'}</p>
           <p style={{ fontSize: '.9rem', lineHeight: 1.9 }}>
-            Shop No. 2, Kashif Center, Mission Road, Lahore, Pakistan<br />
-            {ur ? 'فون / واٹس ایپ' : 'Phone / WhatsApp'}: +92 333 4813016<br />
-            {ur ? 'عمومی' : 'General'}: contact@zzgroup.biz<br />
-            {ur ? 'اسٹریٹجک' : 'Strategic'}: ceo@zzgroup.biz
+            <span className="ltr">Shop No. 2, Kashif Center, Mission Road, Lahore, Pakistan</span><br />
+            {ur ? 'فون / واٹس ایپ' : 'Phone / WhatsApp'}: <span className="ltr">+92 333 4813016</span><br />
+            {ur ? 'عمومی' : 'General'}: <span className="ltr">contact@zzgroup.biz</span><br />
+            {ur ? 'اسٹریٹجک' : 'Strategic'}: <span className="ltr">ceo@zzgroup.biz</span>
           </p>
           <p style={{ fontSize: '.85rem', color: 'var(--zz-antique-gold)' }}>
             {ur ? 'پاکستان بھر میں ترسیل دستیاب' : 'Pakistan-Wide Delivery Available'}

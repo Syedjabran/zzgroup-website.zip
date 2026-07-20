@@ -33,8 +33,6 @@ export default function WhatsAppButton({
     borderRadius: 'var(--radius)',
     fontWeight: 700,
     fontSize: '.9rem',
-    letterSpacing: '.06em',
-    textTransform: 'uppercase',
     textDecoration: 'none',
     transition: 'background .25s ease, border-color .25s ease, color .25s ease',
     lineHeight: 1
@@ -66,7 +64,7 @@ export default function WhatsAppButton({
   };
 
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" style={variants[variant]}
+    <a href={href} target="_blank" rel="noopener noreferrer" className="wa-btn" style={variants[variant]}
       aria-label={label}>
       <span style={{ color: 'var(--whatsapp)', display: 'inline-flex' }}>
         <WhatsAppGlyph size={variant === 'compact' ? 16 : 18} />
