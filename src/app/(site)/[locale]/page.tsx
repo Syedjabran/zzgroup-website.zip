@@ -33,11 +33,11 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <p className="eyebrow">
             {ur ? 'آرکیٹیکچرل مولڈنگز · وال پینلز · آرائشی سطحیں' : 'ARCHITECTURAL MOULDINGS · WALL PANELS · DECORATIVE SURFACES'}
           </p>
-          <h1 style={{ fontSize: 'clamp(2.4rem, 6vw, 4.6rem)', lineHeight: 1.08, margin: '.6rem 0 0', maxWidth: '16ch' }}>
+          <h1 style={{ fontSize: ur ? 'clamp(2rem, 5vw, 3.6rem)' : 'clamp(2.4rem, 6vw, 4.6rem)', lineHeight: ur ? 1.8 : 1.08, margin: '.6rem 0 0', maxWidth: ur ? '24ch' : '16ch' }}>
             {ur ? 'دیواروں کو شکل دیں۔ جگہوں کو فریم کریں۔ انٹیریئر متعین کریں۔' : 'Shape Walls. Frame Spaces. Define Interiors.'}
           </h1>
           <hr className="gold-rule" />
-          <p style={{ maxWidth: '58ch', color: 'var(--zz-text-muted-light)', fontSize: '1.05rem' }}>
+          <p style={{ maxWidth: '58ch', color: 'var(--zz-text-muted-light)', fontSize: ur ? '1.2rem' : '1.05rem', lineHeight: ur ? 2 : undefined }}>
             {ur
               ? 'رہائشی، کمرشل اور ہاسپیٹیلیٹی انٹیریئرز کے لیے پریمیم فریم مولڈنگز، فلوٹڈ پینلز، ڈبلیو پی سی کلیڈنگ، آرائشی سطحیں اور آرکیٹیکچرل ٹرِمز دریافت کریں۔'
               : 'Discover premium frame mouldings, fluted panels, WPC cladding, decorative surfaces and architectural trims for residential, commercial and hospitality interiors.'}
@@ -61,7 +61,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             ur ? 'ریٹیل اور ہول سیل سپلائی' : 'Retail & Wholesale Supply',
             ur ? 'ٹریڈ اور پراجیکٹ سپورٹ' : 'Trade & Project Support'
           ].map((s) => (
-            <div key={s} style={{ fontWeight: 700, fontSize: '.9rem', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--zz-graphite)' }}>
+            <div key={s} style={{ fontWeight: 700, fontSize: ur ? '1.05rem' : '.9rem', letterSpacing: ur ? 0 : '.06em', textTransform: ur ? 'none' : 'uppercase', color: 'var(--zz-graphite)' }}>
               {s}
             </div>
           ))}
@@ -87,8 +87,8 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
               transition: 'border-color .25s ease'
             }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 600 }}>{label}</span>
-              <span style={{ color: 'var(--zz-antique-gold)', fontSize: '.8rem', letterSpacing: '.12em', textTransform: 'uppercase', marginTop: '.5rem' }}>
-                {ur ? 'دیکھیں →' : 'Explore →'}
+              <span style={{ color: 'var(--zz-antique-gold)', fontSize: ur ? '.95rem' : '.8rem', letterSpacing: ur ? 0 : '.12em', textTransform: ur ? 'none' : 'uppercase', marginTop: '.5rem' }}>
+                {ur ? 'دیکھیں ←' : 'Explore →'}
               </span>
             </Link>
           ))}
