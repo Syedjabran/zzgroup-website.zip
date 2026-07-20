@@ -177,3 +177,43 @@ h1, h2, h3, .display {
   text-transform: uppercase;
   color: var(--zz-aged-bronze);
 }
+
+/* ==========================================================================
+   Urdu / RTL refinements — Nastaliq needs zero tracking, tall line-height,
+   larger sizes. Latin identity elements stay LTR-isolated.
+   ========================================================================== */
+[dir='rtl'] body { font-size: 1.04rem; }
+
+[dir='rtl'] h1, [dir='rtl'] h2, [dir='rtl'] h3 {
+  line-height: 1.9;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+[dir='rtl'] .eyebrow {
+  letter-spacing: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+[dir='rtl'] .btn-primary,
+[dir='rtl'] .btn-secondary,
+[dir='rtl'] .btn-gold {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  padding-block: 0.55rem;
+}
+
+/* WhatsApp button tracking lives here so RTL can neutralise it */
+.wa-btn { letter-spacing: 0.06em; text-transform: uppercase; }
+[dir='rtl'] .wa-btn {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+/* Latin content (numbers, emails, brand marks) inside RTL text */
+.ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
