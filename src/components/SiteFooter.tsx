@@ -27,7 +27,7 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
       <div className="container" style={{ display: 'grid', gap: '2.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', paddingBlock: '3rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', marginBottom: '1rem' }}>
-            <Image src="/logo.jpg" alt="ZZ GROUP" width={46} height={46} style={{ borderRadius: 2 }} />
+            <Image src="/logo.png" alt="ZZ GROUP" width={46} height={46} />
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', letterSpacing: '.14em', color: 'var(--zz-mineral-ivory)' }}>
               ZZ GROUP
             </span>

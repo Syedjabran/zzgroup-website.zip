@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getDictionary, type Locale } from '@/lib/i18n';
-import { whatsappLink, generalMessage } from '@/lib/whatsapp';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 export default function SiteHeader({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
@@ -37,8 +37,8 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
       <div style={{ background: 'var(--zz-obsidian)', borderBottom: '1px solid var(--zz-graphite)' }}>
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBlock: '.7rem', gap: '1rem', flexWrap: 'wrap' }}>
           <Link href={base} style={{ display: 'flex', alignItems: 'center', gap: '.7rem', textDecoration: 'none' }}>
-            <Image src="/logo.jpg" alt="ZZ GROUP" width={52} height={52}
-              style={{ borderRadius: 2, display: 'block' }} priority />
+            <Image src="/logo.png" alt="ZZ GROUP" width={52} height={52}
+              style={{ display: 'block' }} priority />
             <span style={{
               fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 600,
               letterSpacing: '.14em', color: 'var(--zz-mineral-ivory)'
@@ -62,11 +62,7 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
             <Link href={`/${other}`} style={{ fontWeight: 700, color: 'var(--zz-antique-gold)', textDecoration: 'none', fontSize: '.85rem' }}>
               {other === 'ur' ? 'اردو' : 'EN'}
             </Link>
-            <a href={whatsappLink(generalMessage())} target="_blank" rel="noopener noreferrer"
-              className="btn-secondary"
-              style={{ borderColor: 'var(--zz-gunmetal)', color: 'var(--zz-mineral-ivory)', padding: '.55rem 1rem' }}>
-              WhatsApp
-            </a>
+            <WhatsAppButton variant="compact" label="WhatsApp" />
             <Link href={`${base}/contact`} className="btn-gold" style={{ padding: '.6rem 1.1rem' }}>
               {ur ? 'قیمت طلب کریں' : 'Request Quotation'}
             </Link>
