@@ -2,37 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   ZZ GROUP design system — logo-derived palette (Section 10 of brief).
+   Old token names are aliased to the new palette so every existing
+   component (public + admin) adopts the identity without breakage.
+   ========================================================================== */
 :root {
-  --bg: #ffffff;
-  --bg-soft: #f4f9fc;
-  --sky: #249bd0;
-  --deep-blue: #173a53;
-  --charcoal: #17212b;
-  --grey: #67727d;
-  --border: #dde8ee;
-  --whatsapp: #25d366;
-  --error: #b42318;
-  --radius: 12px;
-  --maxw: 1200px;
+  /* Core logo-derived tokens */
+  --zz-carbon-black: #090908;
+  --zz-obsidian: #1e1e1a;
+  --zz-graphite: #2f2e2a;
+  --zz-charcoal: #3a3934;
+  --zz-gunmetal: #4c4b46;
+  --zz-stone-grey: #43423d;
+  --zz-aged-bronze: #957c53;
+  --zz-antique-gold: #b69a68;
+  --zz-champagne: #d3ba87;
+  --zz-mineral-ivory: #e7e0d3;
+  --zz-gallery-white: #f6f4ef;
+  --zz-text-dark: #191916;
+  --zz-text-light: #f3efe7;
+  --zz-text-muted-light: #aaa49a;
+  --zz-text-muted-dark: #6f6c65;
+
+  /* Legacy aliases → remapped to the new identity (non-destructive upgrade) */
+  --bg: var(--zz-gallery-white);
+  --bg-soft: var(--zz-mineral-ivory);
+  --sky: var(--zz-antique-gold);        /* primary accent is now antique gold */
+  --deep-blue: var(--zz-graphite);      /* deep surfaces are now graphite */
+  --charcoal: var(--zz-text-dark);
+  --grey: var(--zz-text-muted-dark);
+  --border: #d8d2c4;
+  --whatsapp: #25d366;                  /* WhatsApp keeps its functional green */
+  --error: #8f2f24;
+
+  --radius: 4px;                        /* sharper, architectural edges */
+  --maxw: 1240px;
 }
 
-html { color-scheme: light; }
+html { color-scheme: light; scroll-behavior: smooth; }
 
 body {
   background: var(--bg);
-  color: var(--charcoal);
-  font-family: var(--font-inter, system-ui, sans-serif);
-  line-height: 1.6;
+  color: var(--zz-text-dark);
+  font-family: var(--font-body, 'Manrope', system-ui, sans-serif);
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.01em;
+}
+
+h1, h2, h3, .display {
+  font-family: var(--font-display, 'Cormorant Garamond', Georgia, serif);
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: var(--zz-graphite);
 }
 
 [dir='rtl'] body {
   font-family: var(--font-urdu, 'Noto Nastaliq Urdu', serif);
   line-height: 2;
 }
+[dir='rtl'] h1, [dir='rtl'] h2, [dir='rtl'] h3 {
+  font-family: var(--font-urdu, 'Noto Nastaliq Urdu', serif);
+}
 
 :focus-visible {
-  outline: 3px solid var(--sky);
+  outline: 2px solid var(--zz-antique-gold);
   outline-offset: 2px;
 }
 
@@ -40,8 +75,8 @@ body {
   position: absolute;
   inset-inline-start: -999px;
   top: 0;
-  background: var(--deep-blue);
-  color: #fff;
+  background: var(--zz-obsidian);
+  color: var(--zz-mineral-ivory);
   padding: 0.75rem 1rem;
   z-index: 100;
 }
@@ -55,41 +90,90 @@ body {
   }
 }
 
-.container { max-width: var(--maxw); margin-inline: auto; padding-inline: 1rem; }
+.container { max-width: var(--maxw); margin-inline: auto; padding-inline: 1.25rem; }
 
+/* ---- Buttons: architectural, restrained ---- */
 .btn-primary {
   display: inline-block;
-  background: var(--sky);
-  color: #fff;
-  border: none;
+  background: var(--zz-graphite);
+  color: var(--zz-mineral-ivory);
+  border: 1px solid var(--zz-graphite);
   border-radius: var(--radius);
-  padding: 0.7rem 1.1rem;
+  padding: 0.8rem 1.6rem;
   font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
   text-decoration: none;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
-.btn-primary:hover { background: var(--deep-blue); }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-primary:hover { background: var(--zz-carbon-black); border-color: var(--zz-antique-gold); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .btn-secondary {
   display: inline-block;
-  background: #fff;
-  color: var(--deep-blue);
-  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--zz-graphite);
+  border: 1px solid var(--zz-gunmetal);
   border-radius: var(--radius);
-  padding: 0.55rem 0.9rem;
+  padding: 0.75rem 1.4rem;
   font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
   text-decoration: none;
+  transition: border-color 0.25s ease, color 0.25s ease;
 }
-.btn-secondary:hover { border-color: var(--sky); }
+.btn-secondary:hover { border-color: var(--zz-antique-gold); color: var(--zz-aged-bronze); }
+
+.btn-gold {
+  display: inline-block;
+  background: var(--zz-antique-gold);
+  color: var(--zz-carbon-black);
+  border: 1px solid var(--zz-antique-gold);
+  border-radius: var(--radius);
+  padding: 0.8rem 1.6rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.25s ease;
+}
+.btn-gold:hover { background: var(--zz-champagne); }
 
 .admin-input {
   width: 100%;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.6rem 0.7rem;
+  border-radius: var(--radius);
+  padding: 0.65rem 0.75rem;
   font: inherit;
   background: #fff;
+  color: var(--zz-text-dark);
 }
-.admin-input:focus-visible { border-color: var(--sky); }
+.admin-input:focus-visible { border-color: var(--zz-antique-gold); }
+
+/* ---- Premium surfaces ---- */
+.surface-dark {
+  background: linear-gradient(160deg, var(--zz-obsidian) 0%, var(--zz-graphite) 100%);
+  color: var(--zz-mineral-ivory);
+}
+.surface-dark h1, .surface-dark h2, .surface-dark h3 { color: var(--zz-mineral-ivory); }
+
+.gold-rule {
+  width: 56px; height: 2px;
+  background: var(--zz-antique-gold);
+  border: none; margin: 1.1rem 0;
+}
+
+.eyebrow {
+  font-family: var(--font-body, 'Manrope', sans-serif);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--zz-aged-bronze);
+}
