@@ -1,56 +1,83 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getDictionary, type Locale } from '@/lib/i18n';
 
 export default function SiteFooter({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
   const base = `/${locale}`;
+  const ur = locale === 'ur';
   const year = new Date().getFullYear();
 
   const links = [
     { href: `${base}`, label: t.nav.home },
     { href: `${base}/about`, label: t.nav.about },
-    { href: `${base}/products`, label: t.nav.products },
-    { href: `${base}/gallery`, label: t.nav.gallery },
+    { href: `${base}/products`, label: ur ? 'کلیکشنز' : 'Collections' },
+    { href: `${base}/gallery`, label: ur ? 'پراجیکٹس' : 'Projects' },
     { href: `${base}/contact`, label: t.nav.contact },
     { href: `${base}/faqs`, label: t.nav.faqs }
   ];
 
-  const categories = [
-    'Photo-Frame Mouldings', 'Framing Accessories', 'Fluted Wall Panels',
-    'WPC Wall Cladding', 'Decorative Surface Panels', 'Skirting, Cornices and Trims'
+  const collections = [
+    'Frame Mouldings', 'Wall Panels', 'WPC Cladding',
+    'Marble & Onyx Panels', 'Decorative Surfaces', 'Skirting, Cornices & Trims', 'Framing Accessories'
   ];
 
   return (
-    <footer style={{ background: 'var(--charcoal)', color: '#cfe0ea', marginTop: '3rem' }}>
-      <div className="container" style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', paddingBlock: '2.5rem' }}>
+    <footer style={{ background: 'var(--zz-carbon-black)', color: 'var(--zz-text-muted-light)', marginTop: '4rem' }}>
+      <div className="container" style={{ display: 'grid', gap: '2.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', paddingBlock: '3rem' }}>
         <div>
-          <strong style={{ color: '#fff', fontSize: '1.1rem' }}>ZZ Group</strong>
-          <p style={{ fontSize: '.9rem', marginTop: '.5rem' }}>{t.footer.about}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', marginBottom: '1rem' }}>
+            <Image src="/logo.jpg" alt="ZZ GROUP" width={46} height={46} style={{ borderRadius: 2 }} />
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', letterSpacing: '.14em', color: 'var(--zz-mineral-ivory)' }}>
+              ZZ GROUP
+            </span>
+          </div>
+          <p style={{ fontSize: '.88rem', lineHeight: 1.7 }}>
+            {ur
+              ? 'پاکستان کا پریمیم آرکیٹیکچرل مولڈنگز، وال پینلز اور آرائشی سطحوں کا برانڈ۔'
+              : "Pakistan's premium architectural mouldings, wall panels and decorative surfaces brand."}
+          </p>
         </div>
+
         <div>
-          <strong style={{ color: '#fff' }}>Links</strong>
-          <ul style={{ listStyle: 'none', padding: 0, marginTop: '.5rem', display: 'grid', gap: '.3rem' }}>
-            {links.map((l) => <li key={l.href}><Link href={l.href} style={{ color: '#cfe0ea', textDecoration: 'none' }}>{l.label}</Link></li>)}
+          <p className="eyebrow" style={{ marginTop: 0 }}>{ur ? 'روابط' : 'Navigate'}</p>
+          <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '.4rem' }}>
+            {links.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} style={{ color: 'var(--zz-text-muted-light)', textDecoration: 'none', fontSize: '.9rem' }}>
+                  {l.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
+
         <div>
-          <strong style={{ color: '#fff' }}>Categories</strong>
-          <ul style={{ listStyle: 'none', padding: 0, marginTop: '.5rem', display: 'grid', gap: '.3rem', fontSize: '.9rem' }}>
-            {categories.map((c) => <li key={c}>{c}</li>)}
+          <p className="eyebrow" style={{ marginTop: 0 }}>{ur ? 'کلیکشنز' : 'Collections'}</p>
+          <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '.4rem', fontSize: '.9rem' }}>
+            {collections.map((c) => <li key={c}>{c}</li>)}
           </ul>
         </div>
+
         <div>
-          <strong style={{ color: '#fff' }}>Contact</strong>
-          <p style={{ fontSize: '.9rem', marginTop: '.5rem' }}>
+          <p className="eyebrow" style={{ marginTop: 0 }}>{ur ? 'رابطہ' : 'Contact'}</p>
+          <p style={{ fontSize: '.9rem', lineHeight: 1.9 }}>
             Shop No. 2, Kashif Center, Mission Road, Lahore, Pakistan<br />
-            +92 333 4813016<br />
-            zzshopmoulding@gmail.com
+            {ur ? 'فون / واٹس ایپ' : 'Phone / WhatsApp'}: +92 333 4813016<br />
+            {ur ? 'عمومی' : 'General'}: contact@zzgroup.biz<br />
+            {ur ? 'اسٹریٹجک' : 'Strategic'}: ceo@zzgroup.biz
+          </p>
+          <p style={{ fontSize: '.85rem', color: 'var(--zz-antique-gold)' }}>
+            {ur ? 'پاکستان بھر میں ترسیل دستیاب' : 'Pakistan-Wide Delivery Available'}
           </p>
         </div>
       </div>
-      <div className="container" style={{ borderTop: '1px solid #2b3946', paddingBlock: '1.25rem', fontSize: '.8rem' }}>
-        <p>{t.footer.disclaimer}</p>
-        <p style={{ marginTop: '.5rem' }}>© {year} ZZ Group. {t.footer.rights}</p>
+
+      <div style={{ borderTop: '1px solid var(--zz-graphite)' }}>
+        <div className="container" style={{ paddingBlock: '1.25rem', fontSize: '.78rem' }}>
+          <p style={{ margin: 0 }}>{t.footer.disclaimer}</p>
+          <p style={{ margin: '.5rem 0 0' }}>© {year} ZZ GROUP. {t.footer.rights}</p>
+        </div>
       </div>
     </footer>
   );
