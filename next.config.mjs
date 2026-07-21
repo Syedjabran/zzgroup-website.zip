@@ -7,6 +7,13 @@ const supabaseHost = (() => {
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  experimental: {
+    serverActions: {
+      // Default is 1 MB, which rejects product-photo uploads before the
+      // action runs. Form allows images up to 5 MB; 8 MB covers overhead.
+      bodySizeLimit: '8mb'
+    }
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: supabaseHost
