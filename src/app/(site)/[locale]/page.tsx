@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getDictionary, isLocale, type Locale } from '@/lib/i18n';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import HeroVideo from '@/components/HeroVideo';
 import { notFound } from 'next/navigation';
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
@@ -24,6 +25,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     <>
       {/* ============ HERO — architectural dark, logo-derived ============ */}
       <section className="surface-dark" style={{ position: 'relative', overflow: 'hidden' }}>
+        <HeroVideo />
         {/* Precision drafting lines */}
         <div aria-hidden style={{
           position: 'absolute', inset: 0, opacity: 0.07, pointerEvents: 'none',
@@ -170,3 +172,4 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     </>
   );
 }
+
