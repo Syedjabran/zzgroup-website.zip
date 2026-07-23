@@ -1,282 +1,276 @@
-'use server';
+'use client';
+// ===========================================================================
+// FILE: src/app/(admin)/admin/products/product-form.tsx
+// This is the FORM (client component). If the file you are pasting into
+// currently starts with 'use server', you have the wrong file open.
+// ===========================================================================
 
-import { createClient } from '@/lib/supabase-server';
-import { getStaffUser, can } from '@/lib/auth';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { useActionState, useState } from 'react';
+import { upsertProduct } from './product-actions';
 import {
+  PRODUCT_TYPES,
+  CORE_MATERIALS,
+  SURFACE_FINISHES,
+  SURFACE_TEXTURES,
+  COLOUR_FAMILIES,
+  APPLICATION_AREAS,
+  WATER_RESISTANCE,
+  FIRE_RATINGS,
+  CERTIFICATIONS,
+  INSTALLATION_METHODS,
   PROFILE_SHAPES,
   SUITABLE_FOR,
-  LENGTH_UNITS,
-  STOCK_STATUSES,
-  PRODUCT_TYPE_VALUES,
-  PRICING_BASIS_VALUES,
-  COVERAGE_UNITS
+  EDGE_PROFILES,
+  showsProfile,
+  showsFlooring,
+  showsInstallation,
+  humanise
 } from './catalogue-options';
 
-function slugify(input: string) {
-  return input
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+interface Brand { id: string; name_en: string }
+interface Category { id: string; name_en: string; brand_id: string }
+
+interface Product {
+  id?: string; product_type?: string | null;
+  brand_id?: string | null; category_id?: string | null;
+  sku?: string; slug?: string; name_en?: string; name_ur?: string | null;
+  description_en?: string | null; description_ur?: string | null;
+  series?: string | null; decor_name?: string | null;
+  core_material?: string | null; material?: string | null;
+  finish?: string | null; surface_texture?: string | null;
+  colour_family?: string | null; colour?: string | null;
+  profile_shape?: string | null; suitable_for?: string[] | null;
+  edge_profile?: string | null; installation_method?: string | null;
+  water_resistance?: string | null; fire_rating?: string | null;
+  application_areas?: string[] | null; certifications?: string[] | null;
+  warranty_years?: number | null; country_of_origin?: string | null;
+  application?: string | null; featured?: boolean; published?: boolean;
 }
 
-const ALLOWED_IMAGE = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+export default function ProductForm({
+  brands, categories, product
+}: { brands: Brand[]; categories: Category[]; product?: Product }) {
+  const [state, action, pending] = useActionState(upsertProduct, undefined);
+  const p = product ?? {};
+  const [type, setType] = useState<string>(p.product_type ?? 'frame_moulding');
 
-/** Empty string -> null, otherwise a finite number or null. */
-function num(value: FormDataEntryValue | null): number | null {
-  const raw = String(value ?? '').trim();
-  if (raw === '') return null;
-  const n = Number(raw);
-  return Number.isFinite(n) ? n : null;
+  return (
+    <form action={action} style={{ display: 'grid', gap: '1rem', maxWidth: 760 }}>
+      {product?.id && <input type="hidden" name="id" defaultValue={product.id} />}
+
+      <Group title="What is it">
+        <Field label="Product type *">
+          <select name="product_type" value={type} onChange={(e) => setType(e.target.value)} className="admin-input">
+            {PRODUCT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+        </Field>
+
+        <Two>
+          <Field label="Product name (English) *">
+            <input name="name_en" defaultValue={p.name_en ?? ''} required className="admin-input" />
+          </Field>
+          <Field label="Product name (Urdu)">
+            <input name="name_ur" defaultValue={p.name_ur ?? ''} dir="rtl" className="admin-input" />
+          </Field>
+        </Two>
+
+        <Two>
+          <Field label="SKU *">
+            <input name="sku" defaultValue={p.sku ?? ''} required className="admin-input" />
+          </Field>
+          <Field label="Slug (optional — auto from name)">
+            <input name="slug" defaultValue={p.slug ?? ''} className="admin-input" />
+          </Field>
+        </Two>
+
+        <Two>
+          <Field label="Brand *">
+            <select name="brand_id" defaultValue={p.brand_id ?? ''} required className="admin-input">
+              <option value="" disabled>Choose…</option>
+              {brands.map((b) => <option key={b.id} value={b.id}>{b.name_en}</option>)}
+            </select>
+          </Field>
+          <Field label="Category">
+            <select name="category_id" defaultValue={p.category_id ?? ''} className="admin-input">
+              <option value="">—</option>
+              {categories.map((c) => <option key={c.id} value={c.id}>{c.name_en}</option>)}
+            </select>
+          </Field>
+        </Two>
+
+        <Two>
+          <Field label="Series / collection">
+            <input name="series" defaultValue={p.series ?? ''} className="admin-input" placeholder="e.g. Heritage Gold" />
+          </Field>
+          <Field label="Decor / pattern name">
+            <input name="decor_name" defaultValue={p.decor_name ?? ''} className="admin-input" placeholder="e.g. Natural Oak 4021" />
+          </Field>
+        </Two>
+      </Group>
+
+      <Group title="Material and appearance">
+        <Two>
+          <Pick label="Core material" name="core_material" options={CORE_MATERIALS} value={p.core_material ?? p.material ?? ''} />
+          <Pick label="Surface finish" name="finish" options={SURFACE_FINISHES} value={p.finish ?? ''} />
+        </Two>
+        <Two>
+          <Pick label="Texture" name="surface_texture" options={SURFACE_TEXTURES} value={p.surface_texture ?? ''} />
+          <Pick label="Colour family" name="colour_family" options={COLOUR_FAMILIES} value={p.colour_family ?? ''} />
+        </Two>
+        <Field label="Exact colour / shade name">
+          <input name="colour" defaultValue={p.colour ?? ''} className="admin-input" />
+        </Field>
+      </Group>
+
+      {showsProfile(type) && (
+        <Group title="Profile">
+          <Two>
+            <Field label="Profile shape">
+              <select name="profile_shape" defaultValue={p.profile_shape ?? ''} className="admin-input">
+                <option value="">—</option>
+                {PROFILE_SHAPES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}
+              </select>
+            </Field>
+            <div />
+          </Two>
+          <Checks label="Suitable for" name="suitable_for" options={SUITABLE_FOR} selected={p.suitable_for ?? []} humanised />
+        </Group>
+      )}
+
+      {showsFlooring(type) && (
+        <Group title="Flooring">
+          <Two>
+            <Pick label="Edge profile" name="edge_profile" options={EDGE_PROFILES} value={p.edge_profile ?? ''} />
+            <div />
+          </Two>
+          <p style={hint}>Wear layer, AC rating and thickness are set per size, in the Sizes panel below.</p>
+        </Group>
+      )}
+
+      {showsInstallation(type) && (
+        <Group title="Installation and performance">
+          <Two>
+            <Pick label="Installation method" name="installation_method" options={INSTALLATION_METHODS} value={p.installation_method ?? ''} />
+            <Pick label="Water resistance" name="water_resistance" options={WATER_RESISTANCE} value={p.water_resistance ?? ''} />
+          </Two>
+          <Two>
+            <Pick label="Fire rating" name="fire_rating" options={FIRE_RATINGS} value={p.fire_rating ?? ''} />
+            <Field label="Warranty (years)">
+              <input name="warranty_years" type="number" min="0" defaultValue={p.warranty_years ?? ''} className="admin-input" />
+            </Field>
+          </Two>
+        </Group>
+      )}
+
+      <Group title="Where it is used">
+        <Checks label="Application areas" name="application_areas" options={APPLICATION_AREAS} selected={p.application_areas ?? []} />
+        <Checks label="Certifications" name="certifications" options={CERTIFICATIONS} selected={p.certifications ?? []} />
+        <Two>
+          <Field label="Country of origin">
+            <input name="country_of_origin" defaultValue={p.country_of_origin ?? ''} className="admin-input" />
+          </Field>
+          <Field label="Application note">
+            <input name="application" defaultValue={p.application ?? ''} className="admin-input" />
+          </Field>
+        </Two>
+      </Group>
+
+      <Group title="Description and media">
+        <Field label="Description (English)">
+          <textarea name="description_en" defaultValue={p.description_en ?? ''} rows={3} className="admin-input" />
+        </Field>
+        <Field label="Description (Urdu)">
+          <textarea name="description_ur" defaultValue={p.description_ur ?? ''} rows={3} dir="rtl" className="admin-input" />
+        </Field>
+        <Field label="Primary image (JPG/PNG/WebP/AVIF, ≤5 MB)">
+          <input name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="admin-input" />
+        </Field>
+      </Group>
+
+      <label style={rowLabel}>
+        <input type="checkbox" name="featured" defaultChecked={p.featured} /> Featured
+      </label>
+      <label style={rowLabel}>
+        <input type="checkbox" name="published" defaultChecked={p.published} /> Published (unchecked = draft)
+      </label>
+
+      {state?.error && <p role="alert" style={{ color: 'var(--error)' }}>{state.error}</p>}
+
+      <button type="submit" disabled={pending} className="btn-primary" style={{ width: 'fit-content' }}>
+        {pending ? 'Saving…' : 'Save product'}
+      </button>
+    </form>
+  );
 }
 
-function text(value: FormDataEntryValue | null): string | null {
-  const raw = String(value ?? '').trim();
-  return raw === '' ? null : raw;
+const hint: React.CSSProperties = { color: 'var(--grey)', fontSize: '.85rem', margin: 0 };
+const rowLabel: React.CSSProperties = { display: 'flex', gap: '.5rem', alignItems: 'center' };
+
+function Group({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <fieldset style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '1rem', display: 'grid', gap: '.9rem' }}>
+      <legend style={{ fontWeight: 700, fontSize: '.9rem', padding: '0 .4rem', color: 'var(--deep-blue)' }}>{title}</legend>
+      {children}
+    </fieldset>
+  );
 }
 
-/**
- * Curated dropdowns offer an "Other…" option backed by a companion text
- * input named `<field>_other`. Whichever the user filled in wins.
- */
-function choice(formData: FormData, field: string): string | null {
-  const picked = String(formData.get(field) ?? '').trim();
-  if (picked === '__other__') return text(formData.get(`${field}_other`));
-  return picked === '' ? null : picked;
+function Two({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '.9rem' }}>
+      {children}
+    </div>
+  );
 }
 
-function oneOf(value: FormDataEntryValue | null, allowed: readonly string[]): string | null {
-  const raw = String(value ?? '').trim();
-  return allowed.includes(raw) ? raw : null;
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label style={{ display: 'grid', gap: '.3rem' }}>
+      <span style={{ fontWeight: 600, fontSize: '.9rem' }}>{label}</span>
+      {children}
+    </label>
+  );
 }
 
-function list(formData: FormData, field: string, allowed: readonly string[]): string[] {
-  return formData.getAll(field).map(String).filter((v) => allowed.includes(v));
+/** Curated dropdown with a free-text "Other…" fallback. */
+function Pick({
+  label, name, options, value
+}: { label: string; name: string; options: readonly string[]; value: string }) {
+  const known = value !== '' && options.includes(value);
+  const [choice, setChoice] = useState(value === '' ? '' : known ? value : '__other__');
+
+  return (
+    <div style={{ display: 'grid', gap: '.3rem' }}>
+      <label style={{ display: 'grid', gap: '.3rem' }}>
+        <span style={{ fontWeight: 600, fontSize: '.9rem' }}>{label}</span>
+        <select name={name} value={choice} onChange={(e) => setChoice(e.target.value)} className="admin-input">
+          <option value="">—</option>
+          {options.map((o) => <option key={o} value={o}>{o}</option>)}
+          <option value="__other__">Other…</option>
+        </select>
+      </label>
+      {choice === '__other__' && (
+        <input name={`${name}_other`} defaultValue={known ? '' : value}
+          placeholder={`Type the ${label.toLowerCase()}`} className="admin-input" />
+      )}
+    </div>
+  );
 }
 
-// ---------------------------------------------------------------------------
-// PRODUCTS
-// ---------------------------------------------------------------------------
-
-export async function upsertProduct(
-  _prev: { error?: string } | undefined,
-  formData: FormData
-): Promise<{ error?: string }> {
-  const supabase = await createClient();
-  const user = await getStaffUser();
-  if (!user || !can.manageCatalogue(user)) return { error: 'Not authorised.' };
-
-  const id = (formData.get('id') as string) || null;
-  const name_en = String(formData.get('name_en') ?? '').trim();
-  const sku = String(formData.get('sku') ?? '').trim();
-  if (!name_en || !sku) return { error: 'Product name and SKU are required.' };
-
-  const slug = String(formData.get('slug') ?? '').trim() || slugify(name_en);
-
-  const row = {
-    product_type: oneOf(formData.get('product_type'), PRODUCT_TYPE_VALUES) ?? 'frame_moulding',
-    brand_id: String(formData.get('brand_id') ?? '') || null,
-    category_id: String(formData.get('category_id') ?? '') || null,
-    sku,
-    slug,
-    name_en,
-    name_ur: text(formData.get('name_ur')),
-    description_en: text(formData.get('description_en')),
-    description_ur: text(formData.get('description_ur')),
-    series: text(formData.get('series')),
-    decor_name: text(formData.get('decor_name')),
-
-    // Material and appearance
-    core_material: choice(formData, 'core_material'),
-    material: choice(formData, 'core_material'), // keep the legacy column in step
-    finish: choice(formData, 'finish'),
-    surface_texture: choice(formData, 'surface_texture'),
-    colour_family: choice(formData, 'colour_family'),
-    colour: text(formData.get('colour')),
-
-    // Mouldings and trims
-    profile_shape: oneOf(formData.get('profile_shape'), PROFILE_SHAPES),
-    suitable_for: list(formData, 'suitable_for', SUITABLE_FOR),
-
-    // Flooring
-    edge_profile: choice(formData, 'edge_profile'),
-
-    // Installation and performance
-    installation_method: choice(formData, 'installation_method'),
-    water_resistance: choice(formData, 'water_resistance'),
-    fire_rating: choice(formData, 'fire_rating'),
-    application_areas: formData.getAll('application_areas').map(String).filter(Boolean),
-    certifications: formData.getAll('certifications').map(String).filter(Boolean),
-    warranty_years: num(formData.get('warranty_years')),
-    country_of_origin: text(formData.get('country_of_origin')),
-
-    application: text(formData.get('application')),
-    featured: formData.get('featured') === 'on',
-    published: formData.get('published') === 'on'
-  };
-
-  const { data: saved, error } = id
-    ? await supabase.from('products').update(row).eq('id', id).select('id').single()
-    : await supabase.from('products').insert(row).select('id').single();
-
-  if (error) {
-    if (error.code === '23505') return { error: 'That SKU or slug is already in use.' };
-    return { error: error.message };
-  }
-
-  const file = formData.get('image') as File | null;
-  if (file && file.size > 0) {
-    if (!ALLOWED_IMAGE.includes(file.type)) return { error: 'Image must be JPG, PNG, WebP or AVIF.' };
-    if (file.size > MAX_IMAGE_BYTES) return { error: 'Image must be under 5 MB.' };
-
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'webp';
-    const path = `products/${saved!.id}/${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage
-      .from('product-media')
-      .upload(path, file, { upsert: true, contentType: file.type });
-    if (upErr) return { error: `Image upload failed: ${upErr.message}` };
-
-    await supabase.from('product_images').insert({
-      product_id: saved!.id,
-      storage_path: path,
-      is_primary: true
-    });
-  }
-
-  revalidatePath('/admin/products');
-  redirect(`/admin/products/${saved!.id}`);
-}
-
-export async function togglePublish(id: string, publish: boolean) {
-  const supabase = await createClient();
-  const user = await getStaffUser();
-  if (!user || !can.manageCatalogue(user)) return;
-  await supabase.from('products').update({ published: publish }).eq('id', id);
-  revalidatePath('/admin/products');
-}
-
-/** Soft delete — moves the product to the recycle bin and unpublishes it. */
-export async function deleteProduct(id: string) {
-  const supabase = await createClient();
-  const user = await getStaffUser();
-  if (!user || !can.manageCatalogue(user)) return;
-  await supabase.from('products').update({ archived: true, published: false }).eq('id', id);
-  revalidatePath('/admin/products');
-}
-
-export async function restoreProduct(id: string) {
-  const supabase = await createClient();
-  const user = await getStaffUser();
-  if (!user || !can.manageCatalogue(user)) return;
-  await supabase.from('products').update({ archived: false }).eq('id', id);
-  revalidatePath('/admin/products');
-}
-
-/**
- * Hard delete. The database function removes gallery links, related rows,
- * images and variants, then the product, and returns the storage paths so
- * the bucket can be cleared here.
- */
-export async function deleteProductForever(id: string) {
-  const supabase = await createClient();
-  const user = await getStaffUser();
-  if (!user || !can.manageCatalogue(user)) return;
-
-  const { data: paths, error } = await supabase.rpc('delete_product_permanently', {
-    p_product_id: id
-  });
-  if (error) return;
-
-  if (Array.isArray(paths) && paths.length > 0) {
-    await supabase.storage.from('product-media').remove(paths as string[]);
-  }
-
-  revalidatePath('/admin/products');
-}
-
-// ---------------------------------------------------------------------------
-// VARIANTS — one row per sellable size
-// ---------------------------------------------------------------------------
-
-export async function saveVariant(
-  _prev: { error?: string; ok?: boolean } | undefined,
-  formData: FormData
-): Promise<{ error?: string; ok?: boolean }> {
-  const supabase = await createClient();
-  const user = await getStaffUser();
-  if (!user || !can.manageCatalogue(user)) return { error: 'Not authorised.' };
-
-  const id = text(formData.get('id'));
-  const product_id = text(formData.get('product_id'));
-  if (!product_id) return { error: 'Missing product.' };
-
-  const width = num(formData.get('width'));
-  if (width === null || width <= 0) return { error: 'Enter a width greater than zero.' };
-
-  const row = {
-    product_id,
-    sku: text(formData.get('sku')),
-
-    // Geometry
-    width,
-    width_unit: oneOf(formData.get('width_unit'), LENGTH_UNITS) ?? 'inch',
-    thickness: num(formData.get('thickness')),
-    thickness_unit: oneOf(formData.get('thickness_unit'), LENGTH_UNITS) ?? 'mm',
-    rabbet_depth: num(formData.get('rabbet_depth')),
-    height: num(formData.get('height')),
-    dimension_unit: oneOf(formData.get('dimension_unit'), LENGTH_UNITS) ?? 'mm',
-
-    // Supply
-    stick_length: num(formData.get('stick_length')),
-    stick_length_unit: oneOf(formData.get('stick_length_unit'), LENGTH_UNITS) ?? 'ft',
-    sticks_per_bundle: num(formData.get('sticks_per_bundle')),
-    length_per_bundle: num(formData.get('length_per_bundle')),
-    pieces_per_pack: num(formData.get('pieces_per_pack')),
-    coverage_per_pack: num(formData.get('coverage_per_pack')),
-    coverage_unit: oneOf(formData.get('coverage_unit'), COVERAGE_UNITS) ?? 'sqft',
-    weight_kg: num(formData.get('weight_kg')),
-
-    // Performance
-    wear_layer_microns: num(formData.get('wear_layer_microns')),
-    ac_rating: text(formData.get('ac_rating')),
-    density_kg_m3: num(formData.get('density_kg_m3')),
-
-    // Commercial
-    price: num(formData.get('price')),
-    pricing_basis: oneOf(formData.get('pricing_basis'), PRICING_BASIS_VALUES) ?? 'running_foot',
-    currency: text(formData.get('currency')) ?? 'PKR',
-    moq: num(formData.get('moq')),
-    stock_status: oneOf(formData.get('stock_status'), STOCK_STATUSES) ?? 'in_stock',
-    lead_time_days: num(formData.get('lead_time_days')),
-
-    display_order: num(formData.get('display_order')) ?? 0,
-    published: formData.get('published') === 'on'
-  };
-
-  const { error } = id
-    ? await supabase.from('product_variants').update(row).eq('id', id)
-    : await supabase.from('product_variants').insert(row);
-
-  if (error) {
-    if (error.code === '23505') {
-      return { error: 'That width already exists for this product, or the SKU is taken.' };
-    }
-    return { error: error.message };
-  }
-
-  revalidatePath(`/admin/products/${product_id}`);
-  revalidatePath('/admin/products');
-  return { ok: true };
-}
-
-export async function deleteVariant(id: string, productId: string) {
-  const supabase = await createClient();
-  const user = await getStaffUser();
-  if (!user || !can.manageCatalogue(user)) return;
-  await supabase.from('product_variants').delete().eq('id', id);
-  revalidatePath(`/admin/products/${productId}`);
-  revalidatePath('/admin/products');
+function Checks({
+  label, name, options, selected, humanised
+}: { label: string; name: string; options: readonly string[]; selected: string[]; humanised?: boolean }) {
+  return (
+    <div style={{ display: 'grid', gap: '.4rem' }}>
+      <span style={{ fontWeight: 600, fontSize: '.9rem' }}>{label}</span>
+      <div style={{ display: 'flex', gap: '.9rem', flexWrap: 'wrap' }}>
+        {options.map((o) => (
+          <label key={o} style={{ display: 'flex', gap: '.35rem', alignItems: 'center', fontSize: '.9rem' }}>
+            <input type="checkbox" name={name} value={o} defaultChecked={selected.includes(o)} />
+            {humanised ? humanise(o) : o}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
 }
