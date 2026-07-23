@@ -1,0 +1,296 @@
+/* ==========================================================================
+   ZZ GROUP — MOTION SYSTEM
+   src/styles/motion.css
+
+   Imported once by src/components/Motion.tsx. Adds no dependencies.
+
+   Principles
+   - Compositor-only properties (opacity, transform, clip-path). No layout
+     animation, so scrolling holds 60fps on mid-range Android.
+   - Hidden states apply ONLY under .zz-motion-ready, which is set by an
+     inline script. If JS fails, every element renders fully visible.
+   - Direction-aware: --zz-dir flips to -1 under RTL so nothing slides the
+     wrong way in Urdu.
+   - Urdu never receives clip-path reveals (Nastaliq descenders clip badly).
+   - prefers-reduced-motion resolves everything to its final state instantly.
+   ========================================================================== */
+
+:root {
+  /* Slow, weighted entrances read as premium. Fast UI feedback reads as responsive. */
+  --zz-ease-entrance: cubic-bezier(0.22, 1, 0.36, 1);
+  --zz-ease-ui: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --zz-dur-reveal: 860ms;
+  --zz-dur-edge: 1100ms;
+  --zz-dur-ui: 260ms;
+
+  --zz-travel: 18px;
+  --zz-delay: 0ms;
+
+  /* Inline-axis direction multiplier. */
+  --zz-dir: 1;
+}
+
+[dir="rtl"] {
+  --zz-dir: -1;
+}
+
+/* --------------------------------------------------------------------------
+   1 · BASE REVEAL
+   The selector below must stay identical to REVEAL_SELECTOR in Motion.tsx.
+   -------------------------------------------------------------------------- */
+
+.zz-motion-ready main section > *,
+.zz-motion-ready [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--zz-travel), 0);
+  transition:
+    opacity var(--zz-dur-reveal) var(--zz-ease-entrance) var(--zz-delay),
+    transform var(--zz-dur-reveal) var(--zz-ease-entrance) var(--zz-delay);
+}
+
+.zz-motion-ready main section > *.is-in,
+.zz-motion-ready [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Opt out of any subtree. */
+.zz-motion-ready [data-no-reveal],
+.zz-motion-ready [data-no-reveal] * {
+  opacity: 1;
+  transform: none;
+  clip-path: none;
+}
+
+/* --------------------------------------------------------------------------
+   2 · VARIANTS
+   -------------------------------------------------------------------------- */
+
+.zz-motion-ready [data-reveal="fade"] {
+  transform: none;
+}
+
+.zz-motion-ready [data-reveal="start"] {
+  transform: translate3d(calc(var(--zz-travel) * -1 * var(--zz-dir)), 0, 0);
+}
+
+.zz-motion-ready [data-reveal="end"] {
+  transform: translate3d(calc(var(--zz-travel) * var(--zz-dir)), 0, 0);
+}
+
+.zz-motion-ready [data-reveal="rise"] {
+  --zz-travel: 32px;
+}
+
+/* SIGNATURE — the edge draw.
+   A moulding is revealed along its length, not from below. The hero headline
+   and section rules open along the inline axis like stock drawn from a rack.
+   This is the one bold move; everything else stays quiet. */
+.zz-motion-ready [data-reveal="edge"] {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path var(--zz-dur-edge) var(--zz-ease-entrance) var(--zz-delay);
+}
+
+.zz-motion-ready [data-reveal="edge"].is-in {
+  clip-path: inset(0 0 0 0);
+}
+
+/* Nastaliq safety: Urdu drops the clip entirely and fades instead.
+   Note: dir and .zz-motion-ready both live on <html>, so these must be
+   compound selectors — a descendant combinator would never match. */
+html[dir="rtl"].zz-motion-ready [data-reveal="edge"],
+.zz-motion-ready [dir="rtl"] [data-reveal="edge"] {
+  clip-path: none;
+  opacity: 0;
+  transform: translate3d(0, var(--zz-travel), 0);
+  transition:
+    opacity var(--zz-dur-reveal) var(--zz-ease-entrance) var(--zz-delay),
+    transform var(--zz-dur-reveal) var(--zz-ease-entrance) var(--zz-delay);
+}
+
+html[dir="rtl"].zz-motion-ready [data-reveal="edge"].is-in,
+.zz-motion-ready [dir="rtl"] [data-reveal="edge"].is-in {
+  opacity: 1;
+  transform: none;
+  clip-path: none;
+}
+
+/* --------------------------------------------------------------------------
+   3 · MILLED RULE
+   A hairline that draws itself. Use on section dividers.
+   -------------------------------------------------------------------------- */
+
+.zz-rule {
+  display: block;
+  block-size: 1px;
+  border: 0;
+  background: linear-gradient(
+    to right,
+    rgba(182, 154, 104, 0.55),
+    rgba(182, 154, 104, 0.08)
+  );
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--zz-dur-edge) var(--zz-ease-entrance) var(--zz-delay);
+}
+
+[dir="rtl"] .zz-rule {
+  transform-origin: right center;
+}
+
+.zz-rule.is-in {
+  transform: scaleX(1);
+}
+
+/* --------------------------------------------------------------------------
+   4 · MICRO-INTERACTIONS (opt-in classes)
+   -------------------------------------------------------------------------- */
+
+/* Card / tile lift. */
+.zz-lift {
+  transition:
+    transform var(--zz-dur-ui) var(--zz-ease-ui),
+    box-shadow var(--zz-dur-ui) var(--zz-ease-ui);
+}
+
+.zz-lift:hover,
+.zz-lift:focus-within {
+  transform: translate3d(0, -3px, 0);
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.85);
+}
+
+/* Slow image push inside a fixed frame. Put on the wrapper, not the image. */
+.zz-zoom {
+  overflow: hidden;
+}
+
+.zz-zoom img {
+  transition: transform 900ms var(--zz-ease-entrance);
+  will-change: transform;
+}
+
+.zz-zoom:hover img,
+.zz-zoom:focus-within img {
+  transform: scale(1.045);
+}
+
+/* Underline that draws from the inline start. */
+.zz-underline {
+  position: relative;
+}
+
+.zz-underline::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -2px;
+  block-size: 1px;
+  background: currentColor;
+  opacity: 0.7;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--zz-dur-ui) var(--zz-ease-ui);
+}
+
+[dir="rtl"] .zz-underline::after {
+  transform-origin: right center;
+}
+
+.zz-underline:hover::after,
+.zz-underline:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Direction-aware arrow nudge. Pair with the ← used in Urdu. */
+.zz-arrow {
+  display: inline-block;
+  transition: transform var(--zz-dur-ui) var(--zz-ease-ui);
+}
+
+:hover > .zz-arrow,
+:focus-visible > .zz-arrow {
+  transform: translate3d(calc(5px * var(--zz-dir)), 0, 0);
+}
+
+/* Quiet attention ring for the WhatsApp button. Opacity only — no gloss. */
+.zz-pulse {
+  position: relative;
+}
+
+.zz-pulse::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 1px solid rgba(182, 154, 104, 0.5);
+  opacity: 0;
+  animation: zz-ring 6s var(--zz-ease-ui) infinite;
+  pointer-events: none;
+}
+
+@keyframes zz-ring {
+  0%, 82% { opacity: 0; transform: scale(0.96); }
+  88%     { opacity: 0.65; transform: scale(1); }
+  100%    { opacity: 0; transform: scale(1.06); }
+}
+
+/* Image placeholder. Opacity pulse, not a gloss sweep. */
+.zz-shimmer {
+  background-color: rgba(67, 66, 61, 0.35);
+  animation: zz-breathe 1.8s var(--zz-ease-ui) infinite;
+}
+
+@keyframes zz-breathe {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.8; }
+}
+
+/* --------------------------------------------------------------------------
+   5 · HEADER ON SCROLL
+   Additive only: a gold hairline and a shadow. No size change, so no
+   layout shift and no jank on the tablet.
+   -------------------------------------------------------------------------- */
+
+header {
+  transition: box-shadow 400ms var(--zz-ease-ui);
+}
+
+[data-scrolled="true"] header {
+  box-shadow:
+    0 1px 0 rgba(182, 154, 104, 0.16),
+    0 12px 34px -22px rgba(0, 0, 0, 0.9);
+}
+
+/* --------------------------------------------------------------------------
+   6 · ACCESSIBILITY FLOOR
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .zz-motion-ready main section > *,
+  .zz-motion-ready [data-reveal],
+  .zz-rule,
+  .zz-lift,
+  .zz-zoom img,
+  .zz-underline::after,
+  .zz-arrow {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .zz-pulse::before,
+  .zz-shimmer {
+    animation: none !important;
+  }
+}
+
+/* Keyboard focus must never be hidden behind an unrevealed state. */
+.zz-motion-ready :focus-visible {
+  opacity: 1 !important;
+  clip-path: none !important;
+}
