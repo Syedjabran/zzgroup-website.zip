@@ -8,7 +8,10 @@ import {
   PROFILE_SHAPES,
   SUITABLE_FOR,
   LENGTH_UNITS,
-  STOCK_STATUSES
+  STOCK_STATUSES,
+  PRODUCT_TYPE_VALUES,
+  PRICING_BASIS_VALUES,
+  COVERAGE_UNITS
 } from './catalogue-options';
 
 function slugify(input: string) {
@@ -35,12 +38,23 @@ function text(value: FormDataEntryValue | null): string | null {
   return raw === '' ? null : raw;
 }
 
-function oneOf<T extends readonly string[]>(
-  value: FormDataEntryValue | null,
-  allowed: T
-): T[number] | null {
+/**
+ * Curated dropdowns offer an "Other…" option backed by a companion text
+ * input named `<field>_other`. Whichever the user filled in wins.
+ */
+function choice(formData: FormData, field: string): string | null {
+  const picked = String(formData.get(field) ?? '').trim();
+  if (picked === '__other__') return text(formData.get(`${field}_other`));
+  return picked === '' ? null : picked;
+}
+
+function oneOf(value: FormDataEntryValue | null, allowed: readonly string[]): string | null {
   const raw = String(value ?? '').trim();
-  return (allowed as readonly string[]).includes(raw) ? (raw as T[number]) : null;
+  return allowed.includes(raw) ? raw : null;
+}
+
+function list(formData: FormData, field: string, allowed: readonly string[]): string[] {
+  return formData.getAll(field).map(String).filter((v) => allowed.includes(v));
 }
 
 // ---------------------------------------------------------------------------
@@ -62,12 +76,8 @@ export async function upsertProduct(
 
   const slug = String(formData.get('slug') ?? '').trim() || slugify(name_en);
 
-  const suitable_for = formData
-    .getAll('suitable_for')
-    .map(String)
-    .filter((v) => (SUITABLE_FOR as readonly string[]).includes(v));
-
   const row = {
+    product_type: oneOf(formData.get('product_type'), PRODUCT_TYPE_VALUES) ?? 'frame_moulding',
     brand_id: String(formData.get('brand_id') ?? '') || null,
     category_id: String(formData.get('category_id') ?? '') || null,
     sku,
@@ -76,13 +86,34 @@ export async function upsertProduct(
     name_ur: text(formData.get('name_ur')),
     description_en: text(formData.get('description_en')),
     description_ur: text(formData.get('description_ur')),
-    material: text(formData.get('material')),
-    colour: text(formData.get('colour')),
-    finish: text(formData.get('finish')),
-    application: text(formData.get('application')),
     series: text(formData.get('series')),
+    decor_name: text(formData.get('decor_name')),
+
+    // Material and appearance
+    core_material: choice(formData, 'core_material'),
+    material: choice(formData, 'core_material'), // keep the legacy column in step
+    finish: choice(formData, 'finish'),
+    surface_texture: choice(formData, 'surface_texture'),
+    colour_family: choice(formData, 'colour_family'),
+    colour: text(formData.get('colour')),
+
+    // Mouldings and trims
     profile_shape: oneOf(formData.get('profile_shape'), PROFILE_SHAPES),
-    suitable_for,
+    suitable_for: list(formData, 'suitable_for', SUITABLE_FOR),
+
+    // Flooring
+    edge_profile: choice(formData, 'edge_profile'),
+
+    // Installation and performance
+    installation_method: choice(formData, 'installation_method'),
+    water_resistance: choice(formData, 'water_resistance'),
+    fire_rating: choice(formData, 'fire_rating'),
+    application_areas: formData.getAll('application_areas').map(String).filter(Boolean),
+    certifications: formData.getAll('certifications').map(String).filter(Boolean),
+    warranty_years: num(formData.get('warranty_years')),
+    country_of_origin: text(formData.get('country_of_origin')),
+
+    application: text(formData.get('application')),
     featured: formData.get('featured') === 'on',
     published: formData.get('published') === 'on'
   };
@@ -167,7 +198,7 @@ export async function deleteProductForever(id: string) {
 }
 
 // ---------------------------------------------------------------------------
-// VARIANTS — one row per face width of a moulding series
+// VARIANTS — one row per sellable size
 // ---------------------------------------------------------------------------
 
 export async function saveVariant(
@@ -183,26 +214,44 @@ export async function saveVariant(
   if (!product_id) return { error: 'Missing product.' };
 
   const width = num(formData.get('width'));
-  if (width === null || width <= 0) return { error: 'Enter a face width greater than zero.' };
+  if (width === null || width <= 0) return { error: 'Enter a width greater than zero.' };
 
   const row = {
     product_id,
     sku: text(formData.get('sku')),
+
+    // Geometry
     width,
     width_unit: oneOf(formData.get('width_unit'), LENGTH_UNITS) ?? 'inch',
+    thickness: num(formData.get('thickness')),
+    thickness_unit: oneOf(formData.get('thickness_unit'), LENGTH_UNITS) ?? 'mm',
     rabbet_depth: num(formData.get('rabbet_depth')),
     height: num(formData.get('height')),
     dimension_unit: oneOf(formData.get('dimension_unit'), LENGTH_UNITS) ?? 'mm',
+
+    // Supply
     stick_length: num(formData.get('stick_length')),
     stick_length_unit: oneOf(formData.get('stick_length_unit'), LENGTH_UNITS) ?? 'ft',
     sticks_per_bundle: num(formData.get('sticks_per_bundle')),
     length_per_bundle: num(formData.get('length_per_bundle')),
-    price_per_foot: num(formData.get('price_per_foot')),
-    price_per_metre: num(formData.get('price_per_metre')),
+    pieces_per_pack: num(formData.get('pieces_per_pack')),
+    coverage_per_pack: num(formData.get('coverage_per_pack')),
+    coverage_unit: oneOf(formData.get('coverage_unit'), COVERAGE_UNITS) ?? 'sqft',
+    weight_kg: num(formData.get('weight_kg')),
+
+    // Performance
+    wear_layer_microns: num(formData.get('wear_layer_microns')),
+    ac_rating: text(formData.get('ac_rating')),
+    density_kg_m3: num(formData.get('density_kg_m3')),
+
+    // Commercial
+    price: num(formData.get('price')),
+    pricing_basis: oneOf(formData.get('pricing_basis'), PRICING_BASIS_VALUES) ?? 'running_foot',
     currency: text(formData.get('currency')) ?? 'PKR',
     moq: num(formData.get('moq')),
     stock_status: oneOf(formData.get('stock_status'), STOCK_STATUSES) ?? 'in_stock',
     lead_time_days: num(formData.get('lead_time_days')),
+
     display_order: num(formData.get('display_order')) ?? 0,
     published: formData.get('published') === 'on'
   };
