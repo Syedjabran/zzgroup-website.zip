@@ -5,8 +5,14 @@ import { saveVariant, deleteVariant } from './product-actions';
 import {
   LENGTH_UNITS,
   STOCK_STATUSES,
+  PRICING_BASES,
+  COVERAGE_UNITS,
+  AC_RATINGS,
   WIDTH_PRESETS_INCHES,
+  defaultPricingBasis,
   formatWidth,
+  priceLabel,
+  pieceNoun,
   humanise
 } from './catalogue-options';
 
@@ -15,6 +21,8 @@ export interface Variant {
   sku: string | null;
   width: number | string;
   width_unit: string;
+  thickness: number | string | null;
+  thickness_unit: string;
   rabbet_depth: number | string | null;
   height: number | string | null;
   dimension_unit: string;
@@ -22,8 +30,15 @@ export interface Variant {
   stick_length_unit: string;
   sticks_per_bundle: number | null;
   length_per_bundle: number | string | null;
-  price_per_foot: number | string | null;
-  price_per_metre: number | string | null;
+  pieces_per_pack: number | null;
+  coverage_per_pack: number | string | null;
+  coverage_unit: string;
+  weight_kg: number | string | null;
+  wear_layer_microns: number | null;
+  ac_rating: string | null;
+  density_kg_m3: number | string | null;
+  price: number | string | null;
+  pricing_basis: string;
   currency: string;
   moq: number | string | null;
   stock_status: string;
@@ -32,26 +47,29 @@ export interface Variant {
   published: boolean;
 }
 
-const input = 'admin-input';
+const cls = 'admin-input';
 
 /**
- * Sizes for one moulding series. Each row is a face width with its own SKU,
- * rabbet depth and price — the list the customer picks from on the product
- * page.
+ * Sizes for one product. Each row is a sellable SKU — a face width for a
+ * moulding, a plank thickness for flooring, a panel width for cladding.
+ *
+ * productType is optional: pass it to get sharper labels and the right
+ * default pricing basis. Without it the editor still works.
  */
 export default function VariantEditor({
   productId,
-  variants
+  variants,
+  productType = 'frame_moulding'
 }: {
   productId: string;
   variants: Variant[];
+  productType?: string;
 }) {
   const [state, action, pending] = useActionState(saveVariant, undefined);
   const [editing, setEditing] = useState<Variant | null>(null);
-  const [deletingId, startDelete] = useTransition();
+  const [busy, startDelete] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Clear the form once a save succeeds.
   useEffect(() => {
     if (state?.ok) {
       formRef.current?.reset();
@@ -60,14 +78,15 @@ export default function VariantEditor({
   }, [state]);
 
   const v = editing;
+  const noun = pieceNoun(productType);
   const sorted = [...variants].sort((a, b) => Number(a.width) - Number(b.width));
 
   return (
     <section style={{ marginTop: '2.5rem' }}>
       <h2 style={{ color: 'var(--deep-blue)', marginBottom: '.25rem' }}>Sizes</h2>
       <p style={{ color: 'var(--grey)', fontSize: '.9rem', marginTop: 0 }}>
-        One row per face width. Rabbet depth decides what glass, mat and backing
-        the frame can hold, so it is worth filling in.
+        One row per sellable SKU. Thickness, length and price all live here,
+        because they change from size to size.
       </p>
 
       {sorted.length > 0 && (
@@ -75,9 +94,9 @@ export default function VariantEditor({
           <thead>
             <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--border)' }}>
               <th style={{ padding: '.4rem' }}>Width</th>
+              <th>Thickness</th>
               <th>SKU</th>
-              <th>Rabbet</th>
-              <th>Price/ft</th>
+              <th>Price</th>
               <th>Stock</th>
               <th>Status</th>
               <th></th>
@@ -89,32 +108,28 @@ export default function VariantEditor({
                 <td style={{ padding: '.4rem', fontWeight: 600 }}>
                   {formatWidth(row.width, row.width_unit)}
                 </td>
+                <td>{row.thickness ? `${row.thickness}${row.thickness_unit}` : '—'}</td>
                 <td>{row.sku ?? '—'}</td>
-                <td>{row.rabbet_depth ? `${row.rabbet_depth}${row.dimension_unit}` : '—'}</td>
-                <td>{row.price_per_foot ? `${row.currency} ${row.price_per_foot}` : '—'}</td>
+                <td>
+                  {row.price
+                    ? `${row.currency} ${row.price} ${priceLabel(row.pricing_basis)}`
+                    : '—'}
+                </td>
                 <td>{humanise(row.stock_status)}</td>
                 <td style={{ color: row.published ? 'var(--sky)' : 'var(--grey)' }}>
                   {row.published ? 'Live' : 'Hidden'}
                 </td>
                 <td style={{ display: 'flex', gap: '.4rem', padding: '.4rem' }}>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    style={{ fontSize: '.8rem', padding: '.25rem .5rem' }}
-                    onClick={() => setEditing(row)}
-                  >
+                  <button type="button" className="btn-secondary" style={smallBtn}
+                    onClick={() => setEditing(row)}>
                     Edit
                   </button>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    style={{ fontSize: '.8rem', padding: '.25rem .5rem', color: 'var(--error)' }}
-                    disabled={deletingId}
+                  <button type="button" className="btn-secondary"
+                    style={{ ...smallBtn, color: 'var(--error)' }} disabled={busy}
                     onClick={() => {
                       if (!confirm(`Remove the ${formatWidth(row.width, row.width_unit)} size?`)) return;
                       startDelete(() => void deleteVariant(row.id, productId));
-                    }}
-                  >
+                    }}>
                     Remove
                   </button>
                 </td>
@@ -124,126 +139,146 @@ export default function VariantEditor({
         </table>
       )}
 
-      <form
-        ref={formRef}
-        action={action}
-        key={v?.id ?? 'new'}
-        style={{
-          display: 'grid',
-          gap: '.9rem',
-          maxWidth: 720,
-          padding: '1rem',
-          border: '1px solid var(--border)',
-          borderRadius: 6
-        }}
-      >
+      <form ref={formRef} action={action} key={v?.id ?? 'new'} style={formBox}>
         <input type="hidden" name="product_id" value={productId} />
         {v?.id && <input type="hidden" name="id" defaultValue={v.id} />}
 
         <strong>{v ? `Edit ${formatWidth(v.width, v.width_unit)}` : 'Add a size'}</strong>
 
-        <div>
-          <span style={{ fontWeight: 600, fontSize: '.9rem' }}>Common widths</span>
-          <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap', marginTop: '.4rem' }}>
-            {WIDTH_PRESETS_INCHES.map((w) => (
-              <button
-                key={w}
-                type="button"
-                className="btn-secondary"
-                style={{ fontSize: '.85rem', padding: '.25rem .6rem' }}
-                onClick={() => {
-                  const form = formRef.current;
-                  if (!form) return;
-                  (form.elements.namedItem('width') as HTMLInputElement).value = String(w);
-                  (form.elements.namedItem('width_unit') as HTMLSelectElement).value = 'inch';
-                }}
-              >
-                {formatWidth(w, 'inch')}
-              </button>
-            ))}
+        {productType === 'frame_moulding' && (
+          <div>
+            <span style={{ fontWeight: 600, fontSize: '.9rem' }}>Common widths</span>
+            <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap', marginTop: '.4rem' }}>
+              {WIDTH_PRESETS_INCHES.map((w) => (
+                <button key={w} type="button" className="btn-secondary" style={smallBtn}
+                  onClick={() => {
+                    const form = formRef.current;
+                    if (!form) return;
+                    (form.elements.namedItem('width') as HTMLInputElement).value = String(w);
+                    (form.elements.namedItem('width_unit') as HTMLSelectElement).value = 'inch';
+                  }}>
+                  {formatWidth(w, 'inch')}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <Row>
-          <Field label="Face width *">
+          <Field label="Width *">
             <input name="width" type="number" step="0.001" min="0.001" required
-              defaultValue={v?.width != null ? String(v.width) : ''} className={input} />
+              defaultValue={v?.width != null ? String(v.width) : ''} className={cls} />
           </Field>
-          <Field label="Unit">
-            <Units name="width_unit" value={v?.width_unit ?? 'inch'} />
+          <Field label="Unit"><Units name="width_unit" value={v?.width_unit ?? 'inch'} /></Field>
+          <Field label="Thickness">
+            <input name="thickness" type="number" step="0.001"
+              defaultValue={v?.thickness != null ? String(v.thickness) : ''} className={cls} />
           </Field>
-          <Field label="Size SKU">
-            <input name="sku" defaultValue={v?.sku ?? ''} className={input} />
-          </Field>
+          <Field label="Unit"><Units name="thickness_unit" value={v?.thickness_unit ?? 'mm'} /></Field>
         </Row>
 
         <Row>
+          <Field label="Size SKU">
+            <input name="sku" defaultValue={v?.sku ?? ''} className={cls} />
+          </Field>
           <Field label="Rabbet depth">
             <input name="rabbet_depth" type="number" step="0.001"
-              defaultValue={v?.rabbet_depth != null ? String(v.rabbet_depth) : ''} className={input} />
+              defaultValue={v?.rabbet_depth != null ? String(v.rabbet_depth) : ''} className={cls} />
           </Field>
           <Field label="Profile height">
             <input name="height" type="number" step="0.001"
-              defaultValue={v?.height != null ? String(v.height) : ''} className={input} />
+              defaultValue={v?.height != null ? String(v.height) : ''} className={cls} />
           </Field>
-          <Field label="Unit for both">
-            <Units name="dimension_unit" value={v?.dimension_unit ?? 'mm'} />
-          </Field>
+          <Field label="Unit"><Units name="dimension_unit" value={v?.dimension_unit ?? 'mm'} /></Field>
         </Row>
 
         <Row>
-          <Field label="Stick length">
+          <Field label={`${humanise(noun)} length`}>
             <input name="stick_length" type="number" step="0.001"
-              defaultValue={v?.stick_length != null ? String(v.stick_length) : ''} className={input} />
+              defaultValue={v?.stick_length != null ? String(v.stick_length) : ''} className={cls} />
           </Field>
-          <Field label="Unit">
-            <Units name="stick_length_unit" value={v?.stick_length_unit ?? 'ft'} />
-          </Field>
-          <Field label="Sticks per bundle">
+          <Field label="Unit"><Units name="stick_length_unit" value={v?.stick_length_unit ?? 'ft'} /></Field>
+          <Field label={`${humanise(noun)}s per bundle`}>
             <input name="sticks_per_bundle" type="number" min="1"
-              defaultValue={v?.sticks_per_bundle ?? ''} className={input} />
+              defaultValue={v?.sticks_per_bundle ?? ''} className={cls} />
           </Field>
-        </Row>
-
-        <Row>
           <Field label="Length per bundle">
             <input name="length_per_bundle" type="number" step="0.001"
-              defaultValue={v?.length_per_bundle != null ? String(v.length_per_bundle) : ''} className={input} />
+              defaultValue={v?.length_per_bundle != null ? String(v.length_per_bundle) : ''} className={cls} />
+          </Field>
+        </Row>
+
+        <Row>
+          <Field label={`${humanise(noun)}s per pack`}>
+            <input name="pieces_per_pack" type="number" min="1"
+              defaultValue={v?.pieces_per_pack ?? ''} className={cls} />
+          </Field>
+          <Field label="Coverage per pack">
+            <input name="coverage_per_pack" type="number" step="0.001"
+              defaultValue={v?.coverage_per_pack != null ? String(v.coverage_per_pack) : ''} className={cls} />
+          </Field>
+          <Field label="Coverage unit">
+            <select name="coverage_unit" defaultValue={v?.coverage_unit ?? 'sqft'} className={cls}>
+              {COVERAGE_UNITS.map((u) => (
+                <option key={u} value={u}>{u === 'sqft' ? 'ft²' : 'm²'}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Weight (kg)">
+            <input name="weight_kg" type="number" step="0.001"
+              defaultValue={v?.weight_kg != null ? String(v.weight_kg) : ''} className={cls} />
+          </Field>
+        </Row>
+
+        <Row>
+          <Field label="Wear layer (microns)">
+            <input name="wear_layer_microns" type="number" min="0"
+              defaultValue={v?.wear_layer_microns ?? ''} className={cls} />
+          </Field>
+          <Field label="AC rating">
+            <select name="ac_rating" defaultValue={v?.ac_rating ?? ''} className={cls}>
+              <option value="">—</option>
+              {AC_RATINGS.map((a) => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </Field>
+          <Field label="Density (kg/m³)">
+            <input name="density_kg_m3" type="number" step="0.01"
+              defaultValue={v?.density_kg_m3 != null ? String(v.density_kg_m3) : ''} className={cls} />
           </Field>
           <Field label="Minimum order">
             <input name="moq" type="number" step="0.01"
-              defaultValue={v?.moq != null ? String(v.moq) : ''} className={input} />
-          </Field>
-          <Field label="Lead time (days)">
-            <input name="lead_time_days" type="number" min="0"
-              defaultValue={v?.lead_time_days ?? ''} className={input} />
+              defaultValue={v?.moq != null ? String(v.moq) : ''} className={cls} />
           </Field>
         </Row>
 
         <Row>
-          <Field label="Price per foot">
-            <input name="price_per_foot" type="number" step="0.01" min="0"
-              defaultValue={v?.price_per_foot != null ? String(v.price_per_foot) : ''} className={input} />
+          <Field label="Price">
+            <input name="price" type="number" step="0.01" min="0"
+              defaultValue={v?.price != null ? String(v.price) : ''} className={cls} />
           </Field>
-          <Field label="Price per metre">
-            <input name="price_per_metre" type="number" step="0.01" min="0"
-              defaultValue={v?.price_per_metre != null ? String(v.price_per_metre) : ''} className={input} />
+          <Field label="Priced">
+            <select name="pricing_basis"
+              defaultValue={v?.pricing_basis ?? defaultPricingBasis(productType)} className={cls}>
+              {PRICING_BASES.map((b) => <option key={b.value} value={b.value}>{b.label}</option>)}
+            </select>
           </Field>
           <Field label="Currency">
-            <input name="currency" defaultValue={v?.currency ?? 'PKR'} className={input} />
+            <input name="currency" defaultValue={v?.currency ?? 'PKR'} className={cls} />
+          </Field>
+          <Field label="Lead time (days)">
+            <input name="lead_time_days" type="number" min="0"
+              defaultValue={v?.lead_time_days ?? ''} className={cls} />
           </Field>
         </Row>
 
         <Row>
           <Field label="Stock status">
-            <select name="stock_status" defaultValue={v?.stock_status ?? 'in_stock'} className={input}>
-              {STOCK_STATUSES.map((s) => (
-                <option key={s} value={s}>{humanise(s)}</option>
-              ))}
+            <select name="stock_status" defaultValue={v?.stock_status ?? 'in_stock'} className={cls}>
+              {STOCK_STATUSES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}
             </select>
           </Field>
           <Field label="Display order">
-            <input name="display_order" type="number" defaultValue={v?.display_order ?? 0} className={input} />
+            <input name="display_order" type="number" defaultValue={v?.display_order ?? 0} className={cls} />
           </Field>
           <label style={{ display: 'flex', gap: '.5rem', alignItems: 'end', paddingBottom: '.5rem' }}>
             <input type="checkbox" name="published" defaultChecked={v ? v.published : true} />
@@ -268,9 +303,20 @@ export default function VariantEditor({
   );
 }
 
+const smallBtn: React.CSSProperties = { fontSize: '.8rem', padding: '.25rem .5rem' };
+
+const formBox: React.CSSProperties = {
+  display: 'grid',
+  gap: '.9rem',
+  maxWidth: 860,
+  padding: '1rem',
+  border: '1px solid var(--border)',
+  borderRadius: 6
+};
+
 function Row({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '.9rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '.9rem' }}>
       {children}
     </div>
   );
@@ -287,10 +333,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function Units({ name, value }: { name: string; value: string }) {
   return (
-    <select name={name} defaultValue={value} className={input}>
-      {LENGTH_UNITS.map((u) => (
-        <option key={u} value={u}>{u}</option>
-      ))}
+    <select name={name} defaultValue={value} className={cls}>
+      {LENGTH_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
     </select>
   );
 }
