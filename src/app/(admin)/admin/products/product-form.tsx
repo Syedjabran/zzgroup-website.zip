@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { upsertProduct } from './product-actions';
+import { PROFILE_SHAPES, SUITABLE_FOR, humanise } from './catalogue-options';
 
 interface Brand { id: string; name_en: string }
 interface Category { id: string; name_en: string; brand_id: string }
@@ -10,7 +11,9 @@ interface Product {
   sku?: string; slug?: string; name_en?: string; name_ur?: string | null;
   description_en?: string | null; description_ur?: string | null;
   material?: string | null; colour?: string | null; finish?: string | null;
-  application?: string | null; featured?: boolean; published?: boolean;
+  application?: string | null; series?: string | null;
+  profile_shape?: string | null; suitable_for?: string[] | null;
+  featured?: boolean; published?: boolean;
 }
 
 export default function ProductForm({
@@ -18,9 +21,10 @@ export default function ProductForm({
 }: { brands: Brand[]; categories: Category[]; product?: Product }) {
   const [state, action, pending] = useActionState(upsertProduct, undefined);
   const p = product ?? {};
+  const suits = p.suitable_for ?? [];
 
   return (
-    <form action={action} style={{ display: 'grid', gap: '.9rem', maxWidth: 640 }}>
+    <form action={action} style={{ display: 'grid', gap: '.9rem', maxWidth: 720 }}>
       {product?.id && <input type="hidden" name="id" defaultValue={product.id} />}
 
       <Field label="Product name (English) *">
@@ -54,11 +58,36 @@ export default function ProductForm({
         </Field>
       </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.9rem' }}>
+        <Field label="Series / collection">
+          <input name="series" defaultValue={p.series ?? ''} className="admin-input"
+            placeholder="e.g. Heritage Gold" />
+        </Field>
+        <Field label="Profile shape">
+          <select name="profile_shape" defaultValue={p.profile_shape ?? ''} className="admin-input">
+            <option value="">—</option>
+            {PROFILE_SHAPES.map((s) => <option key={s} value={s}>{humanise(s)}</option>)}
+          </select>
+        </Field>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '.9rem' }}>
         <Field label="Material"><input name="material" defaultValue={p.material ?? ''} className="admin-input" /></Field>
         <Field label="Colour"><input name="colour" defaultValue={p.colour ?? ''} className="admin-input" /></Field>
         <Field label="Finish"><input name="finish" defaultValue={p.finish ?? ''} className="admin-input" /></Field>
       </div>
+
+      <fieldset style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '.75rem' }}>
+        <legend style={{ fontWeight: 600, fontSize: '.9rem', padding: '0 .4rem' }}>Suitable for</legend>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {SUITABLE_FOR.map((s) => (
+            <label key={s} style={{ display: 'flex', gap: '.4rem', alignItems: 'center' }}>
+              <input type="checkbox" name="suitable_for" value={s} defaultChecked={suits.includes(s)} />
+              {humanise(s)}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       <Field label="Application">
         <input name="application" defaultValue={p.application ?? ''} className="admin-input" />
