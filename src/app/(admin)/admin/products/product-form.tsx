@@ -1,7 +1,7 @@
 'use client';
 // ===========================================================================
 // FILE: src/app/(admin)/admin/products/product-form.tsx
-// This is the FORM (client component). If the file you are pasting into
+// This is the FORM (a client component). If the file you are pasting into
 // currently starts with 'use server', you have the wrong file open.
 // ===========================================================================
 
@@ -16,7 +16,6 @@ import {
   APPLICATION_AREAS,
   WATER_RESISTANCE,
   FIRE_RATINGS,
-  CERTIFICATIONS,
   INSTALLATION_METHODS,
   PROFILE_SHAPES,
   SUITABLE_FOR,
@@ -42,8 +41,8 @@ interface Product {
   profile_shape?: string | null; suitable_for?: string[] | null;
   edge_profile?: string | null; installation_method?: string | null;
   water_resistance?: string | null; fire_rating?: string | null;
-  application_areas?: string[] | null; certifications?: string[] | null;
-  warranty_years?: number | null; country_of_origin?: string | null;
+  application_areas?: string[] | null;
+  warranty_years?: number | null;
   application?: string | null; featured?: boolean; published?: boolean;
 }
 
@@ -60,8 +59,15 @@ export default function ProductForm({
 
       <Group title="What is it">
         <Field label="Product type *">
-          <select name="product_type" value={type} onChange={(e) => setType(e.target.value)} className="admin-input">
-            {PRODUCT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+          <select
+            name="product_type"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            className="admin-input"
+          >
+            {PRODUCT_TYPES.map((t) => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
           </select>
         </Field>
 
@@ -100,22 +106,28 @@ export default function ProductForm({
 
         <Two>
           <Field label="Series / collection">
-            <input name="series" defaultValue={p.series ?? ''} className="admin-input" placeholder="e.g. Heritage Gold" />
+            <input name="series" defaultValue={p.series ?? ''} className="admin-input"
+              placeholder="e.g. Heritage Gold" />
           </Field>
           <Field label="Decor / pattern name">
-            <input name="decor_name" defaultValue={p.decor_name ?? ''} className="admin-input" placeholder="e.g. Natural Oak 4021" />
+            <input name="decor_name" defaultValue={p.decor_name ?? ''} className="admin-input"
+              placeholder="e.g. Natural Oak 4021" />
           </Field>
         </Two>
       </Group>
 
       <Group title="Material and appearance">
         <Two>
-          <Pick label="Core material" name="core_material" options={CORE_MATERIALS} value={p.core_material ?? p.material ?? ''} />
-          <Pick label="Surface finish" name="finish" options={SURFACE_FINISHES} value={p.finish ?? ''} />
+          <Pick label="Core material" name="core_material"
+            options={CORE_MATERIALS} value={p.core_material ?? p.material ?? ''} />
+          <Pick label="Surface finish" name="finish"
+            options={SURFACE_FINISHES} value={p.finish ?? ''} />
         </Two>
         <Two>
-          <Pick label="Texture" name="surface_texture" options={SURFACE_TEXTURES} value={p.surface_texture ?? ''} />
-          <Pick label="Colour family" name="colour_family" options={COLOUR_FAMILIES} value={p.colour_family ?? ''} />
+          <Pick label="Texture" name="surface_texture"
+            options={SURFACE_TEXTURES} value={p.surface_texture ?? ''} />
+          <Pick label="Colour family" name="colour_family"
+            options={COLOUR_FAMILIES} value={p.colour_family ?? ''} />
         </Two>
         <Field label="Exact colour / shade name">
           <input name="colour" defaultValue={p.colour ?? ''} className="admin-input" />
@@ -133,46 +145,49 @@ export default function ProductForm({
             </Field>
             <div />
           </Two>
-          <Checks label="Suitable for" name="suitable_for" options={SUITABLE_FOR} selected={p.suitable_for ?? []} humanised />
+          <Checks label="Suitable for" name="suitable_for"
+            options={SUITABLE_FOR} selected={p.suitable_for ?? []} humanised />
         </Group>
       )}
 
       {showsFlooring(type) && (
         <Group title="Flooring">
           <Two>
-            <Pick label="Edge profile" name="edge_profile" options={EDGE_PROFILES} value={p.edge_profile ?? ''} />
+            <Pick label="Edge profile" name="edge_profile"
+              options={EDGE_PROFILES} value={p.edge_profile ?? ''} />
             <div />
           </Two>
-          <p style={hint}>Wear layer, AC rating and thickness are set per size, in the Sizes panel below.</p>
+          <p style={hint}>
+            Wear layer, AC rating and plank thickness are set per size, in the Sizes panel below.
+          </p>
         </Group>
       )}
 
       {showsInstallation(type) && (
         <Group title="Installation and performance">
           <Two>
-            <Pick label="Installation method" name="installation_method" options={INSTALLATION_METHODS} value={p.installation_method ?? ''} />
-            <Pick label="Water resistance" name="water_resistance" options={WATER_RESISTANCE} value={p.water_resistance ?? ''} />
+            <Pick label="Installation method" name="installation_method"
+              options={INSTALLATION_METHODS} value={p.installation_method ?? ''} />
+            <Pick label="Water resistance" name="water_resistance"
+              options={WATER_RESISTANCE} value={p.water_resistance ?? ''} />
           </Two>
           <Two>
-            <Pick label="Fire rating" name="fire_rating" options={FIRE_RATINGS} value={p.fire_rating ?? ''} />
+            <Pick label="Fire rating" name="fire_rating"
+              options={FIRE_RATINGS} value={p.fire_rating ?? ''} />
             <Field label="Warranty (years)">
-              <input name="warranty_years" type="number" min="0" defaultValue={p.warranty_years ?? ''} className="admin-input" />
+              <input name="warranty_years" type="number" min="0"
+                defaultValue={p.warranty_years ?? ''} className="admin-input" />
             </Field>
           </Two>
         </Group>
       )}
 
       <Group title="Where it is used">
-        <Checks label="Application areas" name="application_areas" options={APPLICATION_AREAS} selected={p.application_areas ?? []} />
-        <Checks label="Certifications" name="certifications" options={CERTIFICATIONS} selected={p.certifications ?? []} />
-        <Two>
-          <Field label="Country of origin">
-            <input name="country_of_origin" defaultValue={p.country_of_origin ?? ''} className="admin-input" />
-          </Field>
-          <Field label="Application note">
-            <input name="application" defaultValue={p.application ?? ''} className="admin-input" />
-          </Field>
-        </Two>
+        <Checks label="Application areas" name="application_areas"
+          options={APPLICATION_AREAS} selected={p.application_areas ?? []} />
+        <Field label="Application note">
+          <input name="application" defaultValue={p.application ?? ''} className="admin-input" />
+        </Field>
       </Group>
 
       <Group title="Description and media">
@@ -203,13 +218,17 @@ export default function ProductForm({
   );
 }
 
+// ---------------------------------------------------------------------------
+
 const hint: React.CSSProperties = { color: 'var(--grey)', fontSize: '.85rem', margin: 0 };
 const rowLabel: React.CSSProperties = { display: 'flex', gap: '.5rem', alignItems: 'center' };
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <fieldset style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '1rem', display: 'grid', gap: '.9rem' }}>
-      <legend style={{ fontWeight: 700, fontSize: '.9rem', padding: '0 .4rem', color: 'var(--deep-blue)' }}>{title}</legend>
+      <legend style={{ fontWeight: 700, fontSize: '.9rem', padding: '0 .4rem', color: 'var(--deep-blue)' }}>
+        {title}
+      </legend>
       {children}
     </fieldset>
   );
@@ -232,7 +251,10 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-/** Curated dropdown with a free-text "Other…" fallback. */
+/**
+ * A curated dropdown that falls back to free text. Choosing "Other…" reveals
+ * an input, so staff are never blocked by a list that misses a value.
+ */
 function Pick({
   label, name, options, value
 }: { label: string; name: string; options: readonly string[]; value: string }) {
@@ -250,8 +272,12 @@ function Pick({
         </select>
       </label>
       {choice === '__other__' && (
-        <input name={`${name}_other`} defaultValue={known ? '' : value}
-          placeholder={`Type the ${label.toLowerCase()}`} className="admin-input" />
+        <input
+          name={`${name}_other`}
+          defaultValue={known ? '' : value}
+          placeholder={`Type the ${label.toLowerCase()}`}
+          className="admin-input"
+        />
       )}
     </div>
   );
@@ -259,7 +285,10 @@ function Pick({
 
 function Checks({
   label, name, options, selected, humanised
-}: { label: string; name: string; options: readonly string[]; selected: string[]; humanised?: boolean }) {
+}: {
+  label: string; name: string; options: readonly string[];
+  selected: string[]; humanised?: boolean;
+}) {
   return (
     <div style={{ display: 'grid', gap: '.4rem' }}>
       <span style={{ fontWeight: 600, fontSize: '.9rem' }}>{label}</span>
