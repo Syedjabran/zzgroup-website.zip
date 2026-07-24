@@ -11,7 +11,8 @@ import {
   STOCK_STATUSES,
   PRODUCT_TYPE_VALUES,
   PRICING_BASIS_VALUES,
-  COVERAGE_UNITS
+  COVERAGE_UNITS,
+  defaultPricingBasis
 } from './catalogue-options';
 
 function slugify(input: string) {
@@ -109,9 +110,7 @@ export async function upsertProduct(
     water_resistance: choice(formData, 'water_resistance'),
     fire_rating: choice(formData, 'fire_rating'),
     application_areas: formData.getAll('application_areas').map(String).filter(Boolean),
-    certifications: formData.getAll('certifications').map(String).filter(Boolean),
     warranty_years: num(formData.get('warranty_years')),
-    country_of_origin: text(formData.get('country_of_origin')),
 
     application: text(formData.get('application')),
     featured: formData.get('featured') === 'on',
@@ -146,8 +145,94 @@ export async function upsertProduct(
     });
   }
 
+  // Sizes staged on the new-product form, posted as JSON because the rows
+  // could not carry a product id until the product existed.
+  if (!id) {
+    const staged = parseStagedSizes(formData.get('sizes_json'));
+    if (staged.length > 0) {
+      const basis = defaultPricingBasis(row.product_type);
+      const { error: vErr } = await supabase.from('product_variants').insert(
+        staged.map((s, i) => ({
+          product_id: saved!.id,
+          width: s.width,
+          width_unit: s.width_unit,
+          thickness: s.thickness,
+          thickness_unit: s.thickness_unit,
+          sku: s.sku,
+          price: s.price,
+          pricing_basis: basis,
+          display_order: i
+        }))
+      );
+      if (vErr) {
+        return {
+          error: `Product saved, but the sizes were not: ${vErr.message}. Add them on the edit screen.`
+        };
+      }
+    }
+  }
+
   revalidatePath('/admin/products');
   redirect(`/admin/products/${saved!.id}`);
+}
+
+interface StagedSize {
+  width: number;
+  width_unit: string;
+  thickness: number | null;
+  thickness_unit: string;
+  sku: string | null;
+  price: number | null;
+}
+
+/** Never trust the payload: validate every field before it reaches the table. */
+function parseStagedSizes(raw: FormDataEntryValue | null): StagedSize[] {
+  if (typeof raw !== 'string' || raw.trim() === '') return [];
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  const seen = new Set<string>();
+  const out: StagedSize[] = [];
+
+  for (const item of parsed) {
+    if (typeof item !== 'object' || item === null) continue;
+    const r = item as Record<string, unknown>;
+
+    const width = Number(r.width);
+    if (!Number.isFinite(width) || width <= 0) continue;
+
+    const width_unit = LENGTH_UNITS.includes(String(r.width_unit) as never)
+      ? String(r.width_unit)
+      : 'inch';
+
+    const key = `${width}-${width_unit}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const thicknessRaw = Number(r.thickness);
+    const priceRaw = Number(r.price);
+
+    out.push({
+      width,
+      width_unit,
+      thickness: Number.isFinite(thicknessRaw) && thicknessRaw > 0 ? thicknessRaw : null,
+      thickness_unit: LENGTH_UNITS.includes(String(r.thickness_unit) as never)
+        ? String(r.thickness_unit)
+        : 'mm',
+      sku: typeof r.sku === 'string' && r.sku.trim() !== '' ? r.sku.trim() : null,
+      price: Number.isFinite(priceRaw) && priceRaw >= 0 ? priceRaw : null
+    });
+
+    if (out.length >= 50) break;
+  }
+
+  return out;
 }
 
 export async function togglePublish(id: string, publish: boolean) {
