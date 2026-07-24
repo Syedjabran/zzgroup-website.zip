@@ -23,8 +23,27 @@ import {
   showsProfile,
   showsFlooring,
   showsInstallation,
+  defaultPricingBasis,
+  formatWidth,
+  priceLabel,
+  LENGTH_UNITS,
   humanise
 } from './catalogue-options';
+
+/** Face widths in inches. */
+const WIDTH_PRESET_INCHES = [0.5, 0.75, 1, 1.5, 2, 2.5, 3, 3.5, 4, 6, 8] as const;
+
+/** Board and panel thicknesses in millimetres. */
+const THICKNESS_PRESET_MM = [3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 25] as const;
+
+interface DraftSize {
+  width: number;
+  width_unit: string;
+  thickness: number | null;
+  thickness_unit: string;
+  sku: string | null;
+  price: number | null;
+}
 
 interface Brand { id: string; name_en: string }
 interface Category { id: string; name_en: string; brand_id: string }
@@ -202,6 +221,8 @@ export default function ProductForm({
         </Field>
       </Group>
 
+      {!product?.id && <DraftSizes productType={type} />}
+
       <label style={rowLabel}>
         <input type="checkbox" name="featured" defaultChecked={p.featured} /> Featured
       </label>
@@ -222,6 +243,155 @@ export default function ProductForm({
 
 const hint: React.CSSProperties = { color: 'var(--grey)', fontSize: '.85rem', margin: 0 };
 const rowLabel: React.CSSProperties = { display: 'flex', gap: '.5rem', alignItems: 'center' };
+const chip: React.CSSProperties = { fontSize: '.8rem', padding: '.25rem .5rem' };
+
+/**
+ * Sizes on the NEW product form.
+ *
+ * A variant row needs a product id, and on a new product there isn't one yet.
+ * So sizes are staged here in browser state and posted as JSON in a hidden
+ * field; the server action creates the product first, then writes them. Full
+ * per-size detail — rabbet, coverage, wear layer, stock — stays on the edit
+ * page, which opens automatically after saving.
+ */
+function DraftSizes({ productType }: { productType: string }) {
+  const [rows, setRows] = useState<DraftSize[]>([]);
+  const [width, setWidth] = useState('');
+  const [widthUnit, setWidthUnit] = useState('inch');
+  const [thickness, setThickness] = useState('');
+  const [thicknessUnit, setThicknessUnit] = useState('mm');
+  const [sku, setSku] = useState('');
+  const [price, setPrice] = useState('');
+  const [note, setNote] = useState('');
+
+  const add = () => {
+    const w = Number(width);
+    if (!Number.isFinite(w) || w <= 0) {
+      setNote('Enter a width first.');
+      return;
+    }
+    if (rows.some((r) => r.width === w && r.width_unit === widthUnit)) {
+      setNote('That width is already in the list.');
+      return;
+    }
+    setRows((prev) => [
+      ...prev,
+      {
+        width: w,
+        width_unit: widthUnit,
+        thickness: thickness === '' ? null : Number(thickness),
+        thickness_unit: thicknessUnit,
+        sku: sku.trim() === '' ? null : sku.trim(),
+        price: price === '' ? null : Number(price)
+      }
+    ]);
+    setWidth(''); setThickness(''); setSku(''); setPrice(''); setNote('');
+  };
+
+  const stopEnter = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      add();
+    }
+  };
+
+  return (
+    <Group title="Sizes">
+      <input type="hidden" name="sizes_json" value={JSON.stringify(rows)} />
+      <p style={hint}>
+        Add the sizes you sell. They are saved with the product, and you can
+        add rabbet depth, coverage, stock and lead time on the next screen.
+      </p>
+
+      <div>
+        <span style={{ fontWeight: 600, fontSize: '.9rem' }}>Common widths</span>
+        <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap', marginTop: '.4rem' }}>
+          {WIDTH_PRESET_INCHES.map((w) => (
+            <button key={w} type="button" className="btn-secondary" style={chip}
+              onClick={() => { setWidth(String(w)); setWidthUnit('inch'); }}>
+              {formatWidth(w, 'inch')}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <span style={{ fontWeight: 600, fontSize: '.9rem' }}>Common thicknesses</span>
+        <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap', marginTop: '.4rem' }}>
+          {THICKNESS_PRESET_MM.map((t) => (
+            <button key={t} type="button" className="btn-secondary" style={chip}
+              onClick={() => { setThickness(String(t)); setThicknessUnit('mm'); }}>
+              {t}mm
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '.6rem' }}>
+        <Field label="Width *">
+          <input type="number" step="0.001" min="0.001" value={width} onKeyDown={stopEnter}
+            onChange={(e) => setWidth(e.target.value)} className="admin-input" />
+        </Field>
+        <Field label="Unit">
+          <select value={widthUnit} onChange={(e) => setWidthUnit(e.target.value)} className="admin-input">
+            {LENGTH_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+        </Field>
+        <Field label="Thickness">
+          <input type="number" step="0.001" value={thickness} onKeyDown={stopEnter}
+            onChange={(e) => setThickness(e.target.value)} className="admin-input" />
+        </Field>
+        <Field label="Unit">
+          <select value={thicknessUnit} onChange={(e) => setThicknessUnit(e.target.value)} className="admin-input">
+            {LENGTH_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+        </Field>
+        <Field label="Size SKU">
+          <input value={sku} onKeyDown={stopEnter} onChange={(e) => setSku(e.target.value)} className="admin-input" />
+        </Field>
+        <Field label={`Price (${priceLabel(defaultPricingBasis(productType))})`}>
+          <input type="number" step="0.01" min="0" value={price} onKeyDown={stopEnter}
+            onChange={(e) => setPrice(e.target.value)} className="admin-input" />
+        </Field>
+      </div>
+
+      <div>
+        <button type="button" className="btn-secondary" onClick={add}>+ Add size</button>
+        {note && <span style={{ color: 'var(--error)', marginInlineStart: '.6rem', fontSize: '.85rem' }}>{note}</span>}
+      </div>
+
+      {rows.length > 0 && (
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
+              <th style={{ padding: '.35rem' }}>Width</th>
+              <th>Thickness</th>
+              <th>SKU</th>
+              <th>Price</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={`${r.width}-${r.width_unit}`} style={{ borderBottom: '1px solid var(--border)' }}>
+                <td style={{ padding: '.35rem', fontWeight: 600 }}>{formatWidth(r.width, r.width_unit)}</td>
+                <td>{r.thickness != null ? `${r.thickness}${r.thickness_unit}` : '—'}</td>
+                <td>{r.sku ?? '—'}</td>
+                <td>{r.price != null ? r.price : '—'}</td>
+                <td>
+                  <button type="button" className="btn-secondary" style={{ ...chip, color: 'var(--error)' }}
+                    onClick={() => setRows((prev) => prev.filter((_, n) => n !== i))}>
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </Group>
+  );
+}
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
