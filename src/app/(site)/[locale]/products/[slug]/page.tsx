@@ -5,6 +5,7 @@ import { getDictionary, isLocale, type Locale } from '@/lib/i18n';
 import { productWhatsappLink } from '@/lib/whatsapp';
 import { primaryImage, mediaUrl } from '@/lib/media';
 import { notFound } from 'next/navigation';
+import { formatWidth, priceLabel, humanise } from '@/app/(admin)/admin/products/catalogue-options';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,6 +69,16 @@ export default async function ProductOrBrand({
     .eq('slug', slug).eq('published', true).eq('archived', false).maybeSingle();
   if (!p) notFound();
 
+  const { data: variantRows } = await supabase
+    .from('product_variants')
+    .select('*')
+    .eq('product_id', p.id)
+    .eq('published', true)
+    .order('display_order')
+    .order('width');
+
+  const variants = variantRows ?? [];
+
   const name = ur && p.name_ur ? p.name_ur : p.name_en;
   const desc = ur && p.description_ur ? p.description_ur : p.description_en;
   const hero = primaryImage(p.product_images);
@@ -104,11 +115,71 @@ export default async function ProductOrBrand({
         <p style={{ color: 'var(--grey)' }}>SKU: <span className="ltr">{p.sku}</span></p>
         {desc && <p>{desc}</p>}
         <ul style={{ color: 'var(--zz-text-dark)', lineHeight: 1.9 }}>
-          {p.material && <li>{ur ? 'میٹیریل' : 'Material'}: {p.material}</li>}
-          {p.colour && <li>{ur ? 'رنگ' : 'Colour'}: {p.colour}</li>}
+          {(p.core_material || p.material) && <li>{ur ? 'میٹیریل' : 'Material'}: {p.core_material ?? p.material}</li>}
           {p.finish && <li>{ur ? 'فنش' : 'Finish'}: {p.finish}</li>}
+          {p.surface_texture && <li>{ur ? 'ساخت' : 'Texture'}: {p.surface_texture}</li>}
+          {(p.colour_family || p.colour) && <li>{ur ? 'رنگ' : 'Colour'}: {p.colour ?? p.colour_family}</li>}
+          {p.profile_shape && <li>{ur ? 'پروفائل' : 'Profile'}: {humanise(p.profile_shape)}</li>}
+          {p.edge_profile && <li>{ur ? 'کنارہ' : 'Edge'}: {p.edge_profile}</li>}
+          {p.installation_method && <li>{ur ? 'تنصیب' : 'Installation'}: {p.installation_method}</li>}
+          {p.water_resistance && <li>{ur ? 'پانی سے مزاحمت' : 'Water resistance'}: {p.water_resistance}</li>}
+          {p.fire_rating && <li>{ur ? 'فائر ریٹنگ' : 'Fire rating'}: {p.fire_rating}</li>}
+          {p.warranty_years && <li>{ur ? 'وارنٹی' : 'Warranty'}: {p.warranty_years} {ur ? 'سال' : 'years'}</li>}
           {p.application && <li>{ur ? 'استعمال' : 'Application'}: {p.application}</li>}
         </ul>
+
+        {variants.length > 0 && (
+          <section style={{ marginBlock: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.05rem', margin: '0 0 .6rem' }}>
+              {ur ? 'دستیاب سائز' : 'Available sizes'}
+            </h2>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.92rem' }}>
+                <thead>
+                  <tr style={{ textAlign: ur ? 'right' : 'left', borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '.45rem .5rem' }}>{ur ? 'چوڑائی' : 'Width'}</th>
+                    <th style={{ padding: '.45rem .5rem' }}>{ur ? 'موٹائی' : 'Thickness'}</th>
+                    <th style={{ padding: '.45rem .5rem' }}>{ur ? 'لمبائی' : 'Length'}</th>
+                    <th style={{ padding: '.45rem .5rem' }}>{ur ? 'دستیابی' : 'Availability'}</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {variants.map((v: any) => (
+                    <tr key={v.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '.45rem .5rem', fontWeight: 700 }} className="ltr">
+                        {formatWidth(v.width, v.width_unit)}
+                      </td>
+                      <td style={{ padding: '.45rem .5rem' }} className="ltr">
+                        {v.thickness ? `${v.thickness}${v.thickness_unit}` : '—'}
+                      </td>
+                      <td style={{ padding: '.45rem .5rem' }} className="ltr">
+                        {v.stick_length ? `${v.stick_length}${v.stick_length_unit}` : '—'}
+                      </td>
+                      <td style={{ padding: '.45rem .5rem' }}>
+                        {v.stock_status === 'in_stock'
+                          ? (ur ? 'اسٹاک میں' : 'In stock')
+                          : humanise(v.stock_status)}
+                      </td>
+                      <td style={{ padding: '.45rem .5rem' }}>
+                        <Link href={`${base}/contact?sku=${v.sku ?? p.sku}`} style={{ whiteSpace: 'nowrap' }}>
+                          {ur ? 'قیمت پوچھیں' : 'Ask price'}
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p style={{ color: 'var(--grey)', fontSize: '.85rem', marginTop: '.5rem' }}>
+              {ur
+                ? 'قیمتیں آرڈر کے حجم کے مطابق مختلف ہوتی ہیں۔ تازہ ترین ریٹ کے لیے رابطہ کریں۔'
+                : `Prices vary with order volume${
+                    variants[0]?.pricing_basis ? ` and are quoted ${priceLabel(variants[0].pricing_basis)}` : ''
+                  }. Contact us for current rates.`}
+            </p>
+          </section>
+        )}
         <p style={{ fontWeight: 700, color: 'var(--zz-graphite)' }}>{t.availability.confirm}</p>
         <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
           <Link href={`${base}/contact?sku=${p.sku}`} className="btn-gold">{t.actions.requestQuote}</Link>
@@ -122,3 +193,4 @@ export default async function ProductOrBrand({
     </div>
   );
 }
+
