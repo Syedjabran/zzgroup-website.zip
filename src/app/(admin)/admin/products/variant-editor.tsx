@@ -8,13 +8,18 @@ import {
   PRICING_BASES,
   COVERAGE_UNITS,
   AC_RATINGS,
-  WIDTH_PRESETS_INCHES,
   defaultPricingBasis,
   formatWidth,
   priceLabel,
   pieceNoun,
   humanise
 } from './catalogue-options';
+
+/** Face widths in inches — mouldings, trims, panel faces. */
+const WIDTH_PRESET_INCHES = [0.5, 0.75, 1, 1.5, 2, 2.5, 3, 3.5, 4, 6, 8] as const;
+
+/** Board and panel thicknesses in millimetres. */
+const THICKNESS_PRESET_MM = [3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 25] as const;
 
 export interface Variant {
   id: string;
@@ -145,24 +150,29 @@ export default function VariantEditor({
 
         <strong>{v ? `Edit ${formatWidth(v.width, v.width_unit)}` : 'Add a size'}</strong>
 
-        {productType === 'frame_moulding' && (
-          <div>
-            <span style={{ fontWeight: 600, fontSize: '.9rem' }}>Common widths</span>
-            <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap', marginTop: '.4rem' }}>
-              {WIDTH_PRESETS_INCHES.map((w) => (
-                <button key={w} type="button" className="btn-secondary" style={smallBtn}
-                  onClick={() => {
-                    const form = formRef.current;
-                    if (!form) return;
-                    (form.elements.namedItem('width') as HTMLInputElement).value = String(w);
-                    (form.elements.namedItem('width_unit') as HTMLSelectElement).value = 'inch';
-                  }}>
-                  {formatWidth(w, 'inch')}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <Presets
+          label="Common widths"
+          values={WIDTH_PRESET_INCHES}
+          render={(w) => formatWidth(w, 'inch')}
+          onPick={(w) => {
+            const form = formRef.current;
+            if (!form) return;
+            (form.elements.namedItem('width') as HTMLInputElement).value = String(w);
+            (form.elements.namedItem('width_unit') as HTMLSelectElement).value = 'inch';
+          }}
+        />
+
+        <Presets
+          label="Common thicknesses"
+          values={THICKNESS_PRESET_MM}
+          render={(t) => `${t}mm`}
+          onPick={(t) => {
+            const form = formRef.current;
+            if (!form) return;
+            (form.elements.namedItem('thickness') as HTMLInputElement).value = String(t);
+            (form.elements.namedItem('thickness_unit') as HTMLSelectElement).value = 'mm';
+          }}
+        />
 
         <Row>
           <Field label="Width *">
@@ -304,6 +314,30 @@ export default function VariantEditor({
 }
 
 const smallBtn: React.CSSProperties = { fontSize: '.8rem', padding: '.25rem .5rem' };
+
+/** A row of one-tap chips that fill a numeric field and its unit. */
+function Presets<T extends number>({
+  label, values, render, onPick
+}: {
+  label: string;
+  values: readonly T[];
+  render: (v: T) => string;
+  onPick: (v: T) => void;
+}) {
+  return (
+    <div>
+      <span style={{ fontWeight: 600, fontSize: '.9rem' }}>{label}</span>
+      <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap', marginTop: '.4rem' }}>
+        {values.map((v) => (
+          <button key={v} type="button" className="btn-secondary" style={smallBtn}
+            onClick={() => onPick(v)}>
+            {render(v)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const formBox: React.CSSProperties = {
   display: 'grid',
