@@ -23,7 +23,15 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
 
   return (
     <footer style={{ background: 'linear-gradient(160deg, var(--zz-ink) 0%, var(--zz-slate) 60%, var(--zz-slate-soft) 100%)', color: '#b5ac9c', marginTop: '4rem', borderTop: '1px solid rgba(224, 205, 159, 0.4)' }}>
-      <div className="container" style={{ display: 'grid', gap: '2.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', paddingBlock: '3rem' }}>
+      {/* Grand wordmark tier — the house signature */}
+      <div className="container" style={{ paddingBlock: '3rem 1rem', textAlign: 'center' }}>
+        <p className="footer-wordmark" style={{ margin: 0 }}>ZZ GROUP</p>
+        <p style={{ margin: '.7rem 0 0', color: 'var(--zz-champagne)', fontWeight: 700, letterSpacing: ur ? 0 : '.26em', textTransform: ur ? 'none' : 'uppercase', fontSize: ur ? '1rem' : '.74rem' }}>
+          {ur ? 'زیڈ زی مولڈنگ · زیڈ زی ڈیکور' : 'ZZMOLDING · ZZDECOR'}
+        </p>
+        <hr className="hairline-gold" style={{ marginTop: '2.2rem' }} />
+      </div>
+      <div className="container" style={{ display: 'grid', gap: '2.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', paddingBlock: '1.5rem 3rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', marginBottom: '1rem' }}>
             <Image src="/logo.png" alt="ZZ GROUP" width={46} height={46} />
