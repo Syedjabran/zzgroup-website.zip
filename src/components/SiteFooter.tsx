@@ -22,7 +22,7 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
     : ['Frame Mouldings', 'Wall Panels', 'WPC Cladding', 'Marble & Onyx Panels', 'Decorative Surfaces', 'Skirting, Cornices & Trims', 'Framing Accessories'];
 
   return (
-    <footer style={{ background: 'linear-gradient(160deg, var(--zz-ink) 0%, var(--zz-slate) 100%)', color: 'var(--zz-text-muted-light)', marginTop: '4rem' }}>
+    <footer style={{ background: 'linear-gradient(160deg, var(--zz-ink) 0%, var(--zz-slate) 60%, var(--zz-slate-soft) 100%)', color: '#b5ac9c', marginTop: '4rem', borderTop: '1px solid rgba(224, 205, 159, 0.4)' }}>
       <div className="container" style={{ display: 'grid', gap: '2.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', paddingBlock: '3rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', marginBottom: '1rem' }}>

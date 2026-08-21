@@ -33,8 +33,8 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
         </div>
       </div>
 
-      {/* Main navigation — gallery white (Larson-Juhl), charcoal links, gold accents */}
-      <div style={{ background: '#ffffff', borderBottom: '1px solid var(--border)' }}>
+      {/* Main navigation — champagne-greige (Intco premium), warm charcoal links, gold accents */}
+      <div style={{ background: 'linear-gradient(180deg, #f8f5ec 0%, var(--zz-greige) 100%)', borderBottom: '1px solid var(--zz-oat)' }}>
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBlock: '.7rem', gap: '1rem', flexWrap: 'wrap' }}>
           <Link href={base} style={{ display: 'flex', alignItems: 'center', gap: '.7rem', textDecoration: 'none' }}>
             <Image src="/logo.png" alt="ZZ GROUP" width={52} height={52}

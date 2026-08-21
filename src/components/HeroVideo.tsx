@@ -106,6 +106,10 @@ const media: React.CSSProperties = {
 const scrim: React.CSSProperties = {
   position: 'absolute',
   inset: 0,
-  /* Slate-blue gallery tint (Larson-Juhl structural slate) instead of neutral black */
-  background: 'linear-gradient(155deg, rgba(22, 32, 44, 0.78) 0%, rgba(32, 50, 78, 0.62) 55%, rgba(62, 75, 87, 0.55) 100%)'
+  /* Warm espresso-bronze dim with a soft champagne glow — video stays dim,
+     hero reads as premium champagne-dark (Intco-informed). */
+  background: [
+    'radial-gradient(120% 90% at 78% 8%, rgba(224, 205, 159, 0.16), transparent 55%)',
+    'linear-gradient(155deg, rgba(28, 24, 18, 0.82) 0%, rgba(46, 42, 34, 0.66) 55%, rgba(90, 81, 64, 0.5) 100%)'
+  ].join(', ')
 };
