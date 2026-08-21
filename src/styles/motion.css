@@ -129,8 +129,8 @@ html[dir="rtl"].zz-motion-ready [data-reveal="edge"].is-in,
   border: 0;
   background: linear-gradient(
     to right,
-    rgba(182, 154, 104, 0.55),
-    rgba(182, 154, 104, 0.08)
+    rgba(184, 151, 74, 0.55),
+    rgba(184, 151, 74, 0.08)
   );
   transform: scaleX(0);
   transform-origin: left center;
@@ -225,7 +225,7 @@ html[dir="rtl"].zz-motion-ready [data-reveal="edge"].is-in,
   position: absolute;
   inset: -4px;
   border-radius: inherit;
-  border: 1px solid rgba(182, 154, 104, 0.5);
+  border: 1px solid rgba(184, 151, 74, 0.5);
   opacity: 0;
   animation: zz-ring 6s var(--zz-ease-ui) infinite;
   pointer-events: none;
@@ -260,7 +260,7 @@ header {
 
 [data-scrolled="true"] header {
   box-shadow:
-    0 1px 0 rgba(182, 154, 104, 0.16),
+    0 1px 0 rgba(184, 151, 74, 0.16),
     0 12px 34px -22px rgba(0, 0, 0, 0.9);
 }
 

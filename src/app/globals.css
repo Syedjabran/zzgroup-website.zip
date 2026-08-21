@@ -8,36 +8,60 @@
    component (public + admin) adopts the identity without breakage.
    ========================================================================== */
 :root {
-  /* Core logo-derived tokens */
-  --zz-carbon-black: #090908;
-  --zz-obsidian: #1e1e1a;
-  --zz-graphite: #2f2e2a;
-  --zz-charcoal: #3a3934;
-  --zz-gunmetal: #4c4b46;
-  --zz-stone-grey: #43423d;
-  --zz-aged-bronze: #957c53;
-  --zz-antique-gold: #b69a68;
-  --zz-champagne: #d3ba87;
-  --zz-mineral-ivory: #e7e0d3;
-  --zz-gallery-white: #f6f4ef;
-  --zz-text-dark: #191916;
+  /* ==========================================================================
+     v2 palette — reference-informed refinement (Larson-Juhl gallery-luxury +
+     INTCO warm gilt gold). Darks cooled toward gallery slate-ink; whites made
+     airier; gold enriched into a bronze→gold→champagne metallic ramp; a slate
+     structural accent added. All original token NAMES are preserved so every
+     component (public + admin) inherits the upgrade with zero markup changes.
+     ========================================================================== */
+
+  /* ---- Gallery-light neutrals (Larson-Juhl white dominance) ---- */
+  --zz-porcelain: #fbfaf6;              /* brightest airy near-white */
+  --zz-gallery-white: #f7f5ef;          /* warm gallery white */
+  --zz-mineral-ivory: #ece5d6;          /* soft ivory panel */
+  --zz-oat: #ddd4c1;                    /* warm hairline / soft panel */
+
+  /* ---- Architectural darks — cooled to gallery slate-ink ---- */
+  --zz-carbon-black: #0a0d11;
+  --zz-obsidian: #14181e;
+  --zz-graphite: #1f2731;               /* main dark surface (slate-graphite) */
+  --zz-charcoal: #313a44;
+  --zz-gunmetal: #4b545f;
+  --zz-stone-grey: #40474f;
+
+  /* ---- Slate structural accent (borrowed from Larson-Juhl #20324e/#354552) ---- */
+  --zz-ink: #12181f;
+  --zz-slate: #223041;
+  --zz-slate-soft: #2f3f52;
+  --zz-pewter: #6b7480;                 /* cool muted grey */
+
+  /* ---- Metallic gold — bronze → gold → champagne (INTCO #B8974A, LJ #C6A15B) ---- */
+  --zz-aged-bronze: #8a6d3c;
+  --zz-antique-gold: #b8974a;
+  --zz-gold: #c6a15b;
+  --zz-champagne: #e0cd9f;
+  --zz-gold-grad: linear-gradient(135deg, var(--zz-champagne) 0%, var(--zz-antique-gold) 44%, var(--zz-aged-bronze) 100%);
+
+  /* ---- Text ---- */
+  --zz-text-dark: #1c2229;              /* cool charcoal (LJ #262626) */
   --zz-text-light: #f3efe7;
-  --zz-text-muted-light: #aaa49a;
-  --zz-text-muted-dark: #6f6c65;
+  --zz-text-muted-light: #aab1b9;
+  --zz-text-muted-dark: #626a73;
 
   /* Legacy aliases → remapped to the new identity (non-destructive upgrade) */
   --bg: var(--zz-gallery-white);
   --bg-soft: var(--zz-mineral-ivory);
-  --sky: var(--zz-antique-gold);        /* primary accent is now antique gold */
-  --deep-blue: var(--zz-graphite);      /* deep surfaces are now graphite */
+  --sky: var(--zz-antique-gold);        /* primary accent is antique gold */
+  --deep-blue: var(--zz-graphite);      /* deep surfaces are slate-graphite */
   --charcoal: var(--zz-text-dark);
   --grey: var(--zz-text-muted-dark);
-  --border: #d8d2c4;
+  --border: #ded5c4;                    /* warm gallery hairline */
   --whatsapp: #25d366;                  /* WhatsApp keeps its functional green */
   --error: #8f2f24;
 
   --radius: 4px;                        /* sharper, architectural edges */
-  --maxw: 1240px;
+  --maxw: 1280px;                       /* a touch airier (gallery breathing room) */
 }
 
 html { color-scheme: light; scroll-behavior: smooth; }
@@ -130,9 +154,9 @@ h1, h2, h3, .display {
 
 .btn-gold {
   display: inline-block;
-  background: var(--zz-antique-gold);
+  background: var(--zz-gold-grad);
   color: var(--zz-carbon-black);
-  border: 1px solid var(--zz-antique-gold);
+  border: 1px solid var(--zz-aged-bronze);
   border-radius: var(--radius);
   padding: 0.8rem 1.6rem;
   font-weight: 700;
@@ -141,9 +165,10 @@ h1, h2, h3, .display {
   text-transform: uppercase;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.25s ease;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 10px 24px -16px rgba(138, 109, 60, 0.9);
+  transition: filter 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
 }
-.btn-gold:hover { background: var(--zz-champagne); }
+.btn-gold:hover { filter: brightness(1.06) saturate(1.04); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 14px 30px -16px rgba(138, 109, 60, 1); transform: translateY(-1px); }
 
 .admin-input {
   width: 100%;
@@ -158,16 +183,86 @@ h1, h2, h3, .display {
 
 /* ---- Premium surfaces ---- */
 .surface-dark {
-  background: linear-gradient(160deg, var(--zz-obsidian) 0%, var(--zz-graphite) 100%);
+  /* Gallery slate-ink depth (Larson-Juhl structural slate woven into ZZ's dark) */
+  background: linear-gradient(155deg, var(--zz-ink) 0%, var(--zz-slate) 52%, var(--zz-graphite) 100%);
   color: var(--zz-mineral-ivory);
+  box-shadow: inset 0 1px 0 rgba(184, 151, 74, 0.22);
 }
 .surface-dark h1, .surface-dark h2, .surface-dark h3 { color: var(--zz-mineral-ivory); }
 
+/* Mid-slate structural band — the quiet cool surface between dark hero and
+   light gallery sections (feature strips, sub-heros). */
+.surface-slate {
+  background: linear-gradient(150deg, var(--zz-slate) 0%, var(--zz-slate-soft) 100%);
+  color: var(--zz-mineral-ivory);
+  box-shadow: inset 0 1px 0 rgba(184, 151, 74, 0.18);
+}
+.surface-slate h1, .surface-slate h2, .surface-slate h3 { color: var(--zz-mineral-ivory); }
+
 .gold-rule {
-  width: 56px; height: 2px;
-  background: var(--zz-antique-gold);
+  width: 60px; height: 2px;
+  background: var(--zz-gold-grad);
   border: none; margin: 1.1rem 0;
 }
+
+/* Full-width hairline that fades — gallery-quiet section separator. */
+.hairline-gold {
+  height: 1px; border: 0; margin: 0;
+  background: linear-gradient(to right, transparent, rgba(184, 151, 74, 0.55), transparent);
+}
+
+/* Metallic gold text for restrained accents (numbers, marks). */
+.text-gold {
+  background: var(--zz-gold-grad);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+
+/* ---- Gilt-framed gallery card ----
+   Turns a plain tile into a piece hung on a wall: a dark ground with an inset
+   gold frame line that brightens on hover. Thematically native to a mouldings
+   & framing house, and lifts the collection tiles from flat blocks to product. */
+.frame-card {
+  position: relative;
+  overflow: hidden;
+  /* Reads as a fluted-panel material sample (an actual ZZDECOR product), not an
+     empty block: soft gold gallery spotlight + fine vertical flutes + slate depth. */
+  background:
+    radial-gradient(130% 100% at 82% 12%, rgba(184, 151, 74, 0.16), transparent 58%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 11px, rgba(0, 0, 0, 0.22) 11px 12px),
+    linear-gradient(160deg, var(--zz-graphite) 0%, var(--zz-ink) 100%);
+  border: 1px solid var(--zz-charcoal);
+  border-radius: var(--radius);
+  color: var(--zz-mineral-ivory);
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Editorial catalogue-plate number in the corner of each collection card. */
+.frame-index {
+  font-family: var(--font-body, 'Manrope', sans-serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--zz-gold);
+  opacity: 0.9;
+}
+[dir='rtl'] .frame-index { letter-spacing: 0.14em; }
+.frame-card::before {
+  content: "";
+  position: absolute; inset: 10px;
+  border: 1px solid rgba(184, 151, 74, 0.32);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: border-color 0.3s ease, inset 0.3s ease;
+}
+.frame-card:hover,
+.frame-card:focus-within {
+  border-color: var(--zz-antique-gold);
+  transform: translateY(-3px);
+  box-shadow: 0 22px 48px -26px rgba(0, 0, 0, 0.92);
+}
+.frame-card:hover::before,
+.frame-card:focus-within::before { border-color: rgba(184, 151, 74, 0.78); }
 
 .eyebrow {
   font-family: var(--font-body, 'Manrope', sans-serif);
@@ -194,7 +289,12 @@ h1, h2, h3, .display {
   letter-spacing: 0;
   font-size: 1rem;
   font-weight: 700;
+  margin-block-end: 0.35rem;
 }
+
+/* Nastaliq headings are tall — give RTL section headings extra top room so the
+   glyph box never crowds the eyebrow label above it. */
+[dir='rtl'] main section > h2 { margin-block-start: 0.9rem; }
 
 [dir='rtl'] .btn-primary,
 [dir='rtl'] .btn-secondary,

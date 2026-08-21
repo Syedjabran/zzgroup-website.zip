@@ -35,7 +35,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <p className="eyebrow">
             {ur ? 'آرکیٹیکچرل مولڈنگز · وال پینلز · آرائشی سطحیں' : 'ARCHITECTURAL MOULDINGS · WALL PANELS · DECORATIVE SURFACES'}
           </p>
-          <h1 style={{ fontSize: ur ? 'clamp(2rem, 5vw, 3.6rem)' : 'clamp(2.4rem, 6vw, 4.6rem)', lineHeight: ur ? 1.8 : 1.08, margin: '.6rem 0 0', maxWidth: ur ? '24ch' : '16ch' }}>
+          <h1 style={{ fontSize: ur ? 'clamp(2rem, 5vw, 3.6rem)' : 'clamp(2.4rem, 6vw, 4.6rem)', lineHeight: ur ? 2.05 : 1.08, margin: ur ? '.9rem 0 0' : '.6rem 0 0', maxWidth: ur ? '24ch' : '16ch' }}>
             {ur ? 'دیواروں کو شکل دیں۔ جگہوں کو فریم کریں۔ انٹیریئر متعین کریں۔' : 'Shape Walls. Frame Spaces. Define Interiors.'}
           </h1>
           <hr className="gold-rule" />
@@ -78,19 +78,17 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </h2>
         <div style={{ display: 'grid', gap: '1.25rem', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
           {collections.map(([, label, href], i) => (
-            <Link key={label} href={href} style={{
+            <Link key={label} href={href} className="frame-card" style={{
               textDecoration: 'none',
-              background: i % 2 === 0 ? 'var(--zz-obsidian)' : 'var(--zz-graphite)',
-              color: 'var(--zz-mineral-ivory)',
-              padding: '2.4rem 1.6rem',
-              borderRadius: 'var(--radius)',
-              border: '1px solid var(--zz-charcoal)',
-              display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', minHeight: 170,
-              transition: 'border-color .25s ease'
+              padding: '1.9rem 1.9rem 2.1rem',
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 210, gap: '1.4rem'
             }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 600 }}>{label}</span>
-              <span style={{ color: 'var(--zz-antique-gold)', fontSize: ur ? '.95rem' : '.8rem', letterSpacing: ur ? 0 : '.12em', textTransform: ur ? 'none' : 'uppercase', marginTop: '.5rem' }}>
-                {ur ? 'دیکھیں ←' : 'Explore →'}
+              <span className="frame-index">{String(i + 1).padStart(2, '0')}</span>
+              <span style={{ display: 'block' }}>
+                <span style={{ display: 'block', fontFamily: 'var(--font-display)', fontSize: '1.55rem', fontWeight: 600, color: 'var(--zz-mineral-ivory)', lineHeight: ur ? 1.9 : 1.15 }}>{label}</span>
+                <span style={{ display: 'inline-block', color: 'var(--zz-gold)', fontWeight: 700, fontSize: ur ? '.95rem' : '.8rem', letterSpacing: ur ? 0 : '.12em', textTransform: ur ? 'none' : 'uppercase', marginTop: '.6rem' }}>
+                  {ur ? 'دیکھیں ←' : 'Explore →'}
+                </span>
               </span>
             </Link>
           ))}
