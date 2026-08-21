@@ -55,7 +55,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       </section>
 
       {/* ============ TRUST STRIP — verified facts only ============ */}
-      <section style={{ background: 'var(--zz-mineral-ivory)', borderBottom: '1px solid var(--border)' }}>
+      <section style={{ background: '#ffffff', borderBottom: '1px solid var(--border)', borderTop: '1px solid var(--border)' }}>
         <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', paddingBlock: '1.4rem', textAlign: 'center' }}>
           {[
             ur ? '۲۰۰ سے زائد ڈیزائنز' : '200+ Designs',
@@ -63,7 +63,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             ur ? 'ریٹیل اور ہول سیل سپلائی' : 'Retail & Wholesale Supply',
             ur ? 'ٹریڈ اور پراجیکٹ سپورٹ' : 'Trade & Project Support'
           ].map((s) => (
-            <div key={s} style={{ fontWeight: 700, fontSize: ur ? '1.05rem' : '.9rem', letterSpacing: ur ? 0 : '.06em', textTransform: ur ? 'none' : 'uppercase', color: 'var(--zz-graphite)' }}>
+            <div key={s} style={{ fontWeight: 700, fontSize: ur ? '1.05rem' : '.9rem', letterSpacing: ur ? 0 : '.06em', textTransform: ur ? 'none' : 'uppercase', color: 'var(--zz-slate)' }}>
               {s}
             </div>
           ))}
@@ -85,8 +85,8 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             }}>
               <span className="frame-index">{String(i + 1).padStart(2, '0')}</span>
               <span style={{ display: 'block' }}>
-                <span style={{ display: 'block', fontFamily: 'var(--font-display)', fontSize: '1.55rem', fontWeight: 600, color: 'var(--zz-mineral-ivory)', lineHeight: ur ? 1.9 : 1.15 }}>{label}</span>
-                <span style={{ display: 'inline-block', color: 'var(--zz-gold)', fontWeight: 700, fontSize: ur ? '.95rem' : '.8rem', letterSpacing: ur ? 0 : '.12em', textTransform: ur ? 'none' : 'uppercase', marginTop: '.6rem' }}>
+                <span style={{ display: 'block', fontFamily: 'var(--font-display)', fontSize: '1.55rem', fontWeight: 600, color: 'var(--zz-slate)', lineHeight: ur ? 1.9 : 1.15 }}>{label}</span>
+                <span style={{ display: 'inline-block', color: 'var(--zz-aged-bronze)', fontWeight: 700, fontSize: ur ? '.95rem' : '.8rem', letterSpacing: ur ? 0 : '.12em', textTransform: ur ? 'none' : 'uppercase', marginTop: '.6rem' }}>
                   {ur ? 'دیکھیں ←' : 'Explore →'}
                 </span>
               </span>
@@ -96,9 +96,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       </section>
 
       {/* ============ DIVISIONS ============ */}
-      <section style={{ background: 'var(--zz-mineral-ivory)' }}>
+      <section style={{ background: 'var(--zz-gallery-white)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="container" style={{ paddingBlock: '4rem', display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-          <div style={{ background: 'var(--zz-gallery-white)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2.2rem' }}>
+          <div style={{ background: '#ffffff', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2.2rem', boxShadow: '0 14px 34px -28px rgba(32, 50, 78, 0.4)' }}>
             <p className="eyebrow" style={{ marginTop: 0 }}>ZZMOLDING</p>
             <h3 style={{ fontSize: '1.7rem', margin: '.3rem 0' }}>
               {ur ? 'پیشہ ورانہ فریمنگ کے لیے مولڈنگز' : 'Mouldings for Professional Framing'}
@@ -110,7 +110,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             </p>
             <Link href={`${base}/products/zzmolding`} className="btn-primary">{ur ? 'زیڈزی مولڈنگ دیکھیں' : 'Explore ZZMOLDING'}</Link>
           </div>
-          <div style={{ background: 'var(--zz-gallery-white)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2.2rem' }}>
+          <div style={{ background: '#ffffff', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2.2rem', boxShadow: '0 14px 34px -28px rgba(32, 50, 78, 0.4)' }}>
             <p className="eyebrow" style={{ marginTop: 0 }}>ZZDECOR</p>
             <h3 style={{ fontSize: '1.7rem', margin: '.3rem 0' }}>
               {ur ? 'جدید انٹیریئرز کے لیے سطحیں' : 'Surfaces for Modern Interiors'}

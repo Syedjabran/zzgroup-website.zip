@@ -33,15 +33,15 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
         </div>
       </div>
 
-      {/* Main navigation — obsidian, logo, restrained gold */}
-      <div style={{ background: 'var(--zz-obsidian)', borderBottom: '1px solid var(--zz-graphite)' }}>
+      {/* Main navigation — gallery white (Larson-Juhl), charcoal links, gold accents */}
+      <div style={{ background: '#ffffff', borderBottom: '1px solid var(--border)' }}>
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBlock: '.7rem', gap: '1rem', flexWrap: 'wrap' }}>
           <Link href={base} style={{ display: 'flex', alignItems: 'center', gap: '.7rem', textDecoration: 'none' }}>
             <Image src="/logo.png" alt="ZZ GROUP" width={52} height={52}
               style={{ display: 'block' }} priority />
             <span style={{
               fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 600,
-              letterSpacing: '.14em', color: 'var(--zz-mineral-ivory)'
+              letterSpacing: '.14em', color: 'var(--zz-slate)'
             }}>
               ZZ&nbsp;GROUP
             </span>
@@ -50,7 +50,7 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
           <nav style={{ display: 'flex', gap: '1.15rem', flexWrap: 'wrap', alignItems: 'center' }}>
             {nav.map((n) => (
               <Link key={n.href} href={n.href} style={{
-                color: 'var(--zz-mineral-ivory)', textDecoration: 'none',
+                color: 'var(--zz-text-dark)', textDecoration: 'none',
                 fontWeight: 600,
                 fontSize: ur ? '1rem' : '.82rem',
                 letterSpacing: ur ? 0 : '.08em',
@@ -62,7 +62,7 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
           </nav>
 
           <div style={{ display: 'flex', gap: '.6rem', alignItems: 'center' }}>
-            <Link href={`/${other}`} style={{ fontWeight: 700, color: 'var(--zz-antique-gold)', textDecoration: 'none', fontSize: '.85rem' }}>
+            <Link href={`/${other}`} style={{ fontWeight: 700, color: 'var(--zz-aged-bronze)', textDecoration: 'none', fontSize: '.85rem' }}>
               {other === 'ur' ? 'اردو' : 'EN'}
             </Link>
             <WhatsAppButton variant="compact" label="WhatsApp" />

@@ -57,8 +57,8 @@ export default function WhatsAppButton({
       ...base,
       padding: '0.55rem 0.9rem',
       fontSize: '.8rem',
-      color: 'var(--zz-mineral-ivory)',
-      border: '1px solid var(--zz-gunmetal)',
+      color: 'var(--zz-slate)',
+      border: '1px solid var(--zz-oat)',
       background: 'transparent'
     }
   };

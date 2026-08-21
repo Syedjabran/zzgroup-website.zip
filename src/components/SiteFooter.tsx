@@ -22,7 +22,7 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
     : ['Frame Mouldings', 'Wall Panels', 'WPC Cladding', 'Marble & Onyx Panels', 'Decorative Surfaces', 'Skirting, Cornices & Trims', 'Framing Accessories'];
 
   return (
-    <footer style={{ background: 'var(--zz-carbon-black)', color: 'var(--zz-text-muted-light)', marginTop: '4rem' }}>
+    <footer style={{ background: 'linear-gradient(160deg, var(--zz-ink) 0%, var(--zz-slate) 100%)', color: 'var(--zz-text-muted-light)', marginTop: '4rem' }}>
       <div className="container" style={{ display: 'grid', gap: '2.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', paddingBlock: '3rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', marginBottom: '1rem' }}>
@@ -72,7 +72,7 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
         </div>
       </div>
 
-      <div style={{ borderTop: '1px solid var(--zz-graphite)' }}>
+      <div style={{ borderTop: '1px solid var(--zz-slate-soft)' }}>
         <div className="container" style={{ paddingBlock: '1.25rem', fontSize: '.78rem' }}>
           <p style={{ margin: 0 }}>{t.footer.disclaimer}</p>
           <p style={{ margin: '.5rem 0 0' }}>© {year} ZZ GROUP. {t.footer.rights}</p>

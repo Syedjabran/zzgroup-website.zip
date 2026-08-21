@@ -106,5 +106,6 @@ const media: React.CSSProperties = {
 const scrim: React.CSSProperties = {
   position: 'absolute',
   inset: 0,
-  background: 'rgba(11, 15, 20, 0.55)'
+  /* Slate-blue gallery tint (Larson-Juhl structural slate) instead of neutral black */
+  background: 'linear-gradient(155deg, rgba(22, 32, 44, 0.78) 0%, rgba(32, 50, 78, 0.62) 55%, rgba(62, 75, 87, 0.55) 100%)'
 };
