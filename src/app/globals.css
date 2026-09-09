@@ -1191,16 +1191,16 @@ h3,
 }
 .product-grid {
   display: grid;
-  gap: 1px;
+  gap: 1rem;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  background: var(--atelier-line);
-  border: 1px solid var(--atelier-line);
+  align-items: start;
 }
 .product-card {
   overflow: hidden;
   text-decoration: none;
   color: var(--atelier-ink);
   background: #faf8f3;
+  border: 1px solid var(--atelier-line);
   transition: background 0.25s ease;
 }
 .product-card:hover {
