@@ -1,90 +1,106 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { getDictionary, type Locale } from '@/lib/i18n';
+import Link from "next/link";
+import { getDictionary, type Locale } from "@/lib/i18n";
 
 export default function SiteFooter({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
   const base = `/${locale}`;
-  const ur = locale === 'ur';
+  const ur = locale === "ur";
   const year = new Date().getFullYear();
 
   const links = [
-    { href: `${base}`, label: t.nav.home },
+    { href: base, label: t.nav.home },
+    {
+      href: `${base}/products`,
+      label: ur ? "تمام کلیکشنز" : "All collections",
+    },
+    { href: `${base}/products/zzmolding`, label: "ZZMOLDING" },
+    { href: `${base}/products/zzdecor`, label: "ZZDECOR" },
+    { href: `${base}/gallery`, label: ur ? "پراجیکٹس" : "Projects" },
     { href: `${base}/about`, label: t.nav.about },
-    { href: `${base}/products`, label: ur ? 'کلیکشنز' : 'Collections' },
-    { href: `${base}/gallery`, label: ur ? 'پراجیکٹس' : 'Projects' },
-    { href: `${base}/contact`, label: t.nav.contact },
-    { href: `${base}/faqs`, label: t.nav.faqs }
+    { href: `${base}/faqs`, label: t.nav.faqs },
   ];
 
-  const collections = ur
-    ? ['فریم مولڈنگز', 'وال پینلز', 'ڈبلیو پی سی کلیڈنگ', 'ماربل اور اونکس پینلز', 'آرائشی سطحیں', 'اسکرٹنگ، کارنس اور ٹرِمز', 'فریمنگ لوازمات']
-    : ['Frame Mouldings', 'Wall Panels', 'WPC Cladding', 'Marble & Onyx Panels', 'Decorative Surfaces', 'Skirting, Cornices & Trims', 'Framing Accessories'];
-
   return (
-    <footer style={{ background: 'linear-gradient(160deg, var(--zz-ink) 0%, var(--zz-slate) 60%, var(--zz-slate-soft) 100%)', color: '#b5ac9c', marginTop: '4rem', borderTop: '1px solid rgba(224, 205, 159, 0.4)' }}>
-      {/* Grand wordmark tier — the house signature */}
-      <div className="container" style={{ paddingBlock: '3rem 1rem', textAlign: 'center' }}>
-        <p className="footer-wordmark" style={{ margin: 0 }}>ZZ GROUP</p>
-        <p style={{ margin: '.7rem 0 0', color: 'var(--zz-champagne)', fontWeight: 700, letterSpacing: ur ? 0 : '.26em', textTransform: ur ? 'none' : 'uppercase', fontSize: ur ? '1rem' : '.74rem' }}>
-          {ur ? 'زیڈ زی مولڈنگ · زیڈ زی ڈیکور' : 'ZZMOLDING · ZZDECOR'}
+    <footer className="site-footer">
+      <div className="container site-footer__masthead">
+        <p className="site-footer__wordmark">ZZ GROUP</p>
+        <p className="site-footer__strap">
+          {ur ? "فریم۔ سطح۔ جگہ۔" : "Frame. Surface. Space."}
         </p>
-        <hr className="hairline-gold" style={{ marginTop: '2.2rem' }} />
       </div>
-      <div className="container" style={{ display: 'grid', gap: '2.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', paddingBlock: '1.5rem 3rem' }}>
+
+      <div className="container site-footer__grid">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', marginBottom: '1rem' }}>
-            <Image src="/logo.png" alt="ZZ GROUP" width={46} height={46} />
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', letterSpacing: '.14em', color: 'var(--zz-mineral-ivory)' }}>
-              ZZ GROUP
-            </span>
-          </div>
-          <p style={{ fontSize: '.88rem', lineHeight: 1.7 }}>
-            {ur
-              ? 'پاکستان کا پریمیم آرکیٹیکچرل مولڈنگز، وال پینلز اور آرائشی سطحوں کا برانڈ۔'
-              : "Pakistan's premium architectural mouldings, wall panels and decorative surfaces brand."}
+          <p className="site-footer__title">
+            {ur ? "برانڈ ہاؤس" : "The brand house"}
           </p>
+          <p style={{ maxWidth: "38ch" }}>
+            {ur
+              ? "زیڈ زی مولڈنگ اور زیڈ زی ڈیکور — پاکستان بھر میں فریمنگ اور آرکیٹیکچرل سطحوں کے لیے ایک قابلِ اعتماد ذریعہ۔"
+              : "ZZMOLDING and ZZDECOR — one dependable source for professional framing and architectural surfaces across Pakistan."}
+          </p>
+          <Link
+            href={`${base}/contact`}
+            className="atelier-btn"
+            style={{ marginTop: "1rem" }}
+          >
+            {ur ? "پراجیکٹ شروع کریں" : "Start a project"}
+          </Link>
         </div>
 
         <div>
-          <p className="eyebrow" style={{ marginTop: 0 }}>{ur ? 'روابط' : 'Navigate'}</p>
-          <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '.4rem' }}>
-            {links.map((l) => (
-              <li key={l.href}>
-                <Link href={l.href} style={{ color: 'var(--zz-text-muted-light)', textDecoration: 'none', fontSize: '.9rem' }}>
-                  {l.label}
-                </Link>
+          <p className="site-footer__title">{ur ? "دریافت کریں" : "Explore"}</p>
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              display: "grid",
+              gap: ".55rem",
+            }}
+          >
+            {links.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href}>{item.label}</Link>
               </li>
             ))}
           </ul>
         </div>
 
         <div>
-          <p className="eyebrow" style={{ marginTop: 0 }}>{ur ? 'کلیکشنز' : 'Collections'}</p>
-          <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '.4rem', fontSize: '.9rem' }}>
-            {collections.map((c) => <li key={c}>{c}</li>)}
-          </ul>
-        </div>
-
-        <div>
-          <p className="eyebrow" style={{ marginTop: 0 }}>{ur ? 'رابطہ' : 'Contact'}</p>
-          <p style={{ fontSize: '.9rem', lineHeight: 1.9 }}>
-            <span className="ltr">Shop No. 2, Kashif Center, Mission Road, Lahore, Pakistan</span><br />
-            {ur ? 'فون / واٹس ایپ' : 'Phone / WhatsApp'}: <span className="ltr">+92 333 4813016</span><br />
-            {ur ? 'عمومی' : 'General'}: <span className="ltr">contact@zzgroup.biz</span><br />
-            {ur ? 'اسٹریٹجک' : 'Strategic'}: <span className="ltr">ceo@zzgroup.biz</span>
+          <p className="site-footer__title">
+            {ur ? "لاہور شوروم" : "Lahore showroom"}
           </p>
-          <p style={{ fontSize: '.85rem', color: 'var(--zz-antique-gold)' }}>
-            {ur ? 'پاکستان بھر میں ترسیل دستیاب' : 'Pakistan-Wide Delivery Available'}
+          <p style={{ lineHeight: 1.9 }}>
+            <span className="ltr">
+              Shop No. 2, Kashif Center, Mission Road, Lahore, Pakistan
+            </span>
+            <br />
+            <a href="tel:+923334813016" className="ltr">
+              +92 333 4813016
+            </a>
+            <br />
+            <a href="mailto:contact@zzgroup.biz" className="ltr">
+              contact@zzgroup.biz
+            </a>
+            <br />
+            <a href="mailto:ceo@zzgroup.biz" className="ltr">
+              ceo@zzgroup.biz
+            </a>
+          </p>
+          <p style={{ color: "var(--atelier-brass-light)", fontSize: ".8rem" }}>
+            {ur
+              ? "پاکستان بھر میں ترسیل دستیاب"
+              : "Pakistan-wide delivery available"}
           </p>
         </div>
       </div>
 
-      <div style={{ borderTop: '1px solid var(--zz-slate-soft)' }}>
-        <div className="container" style={{ paddingBlock: '1.25rem', fontSize: '.78rem' }}>
-          <p style={{ margin: 0 }}>{t.footer.disclaimer}</p>
-          <p style={{ margin: '.5rem 0 0' }}>© {year} ZZ GROUP. {t.footer.rights}</p>
-        </div>
+      <div className="container site-footer__bottom">
+        <p style={{ margin: 0 }}>{t.footer.disclaimer}</p>
+        <p style={{ margin: ".35rem 0 0" }}>
+          © {year} ZZ GROUP. {t.footer.rights}
+        </p>
       </div>
     </footer>
   );
