@@ -7,14 +7,19 @@ import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
+export const metadata = {
+  title: 'Collections | Frame Mouldings & Wall Panels Pakistan',
+  description: 'Browse ZZ Group frame mouldings, framing supplies, wall panels, WPC cladding, decorative surfaces and architectural trims across Pakistan.'
+};
+
 export default async function ProductsPage({
   params, searchParams
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ brand?: string; q?: string }>;
+  searchParams: Promise<{ brand?: string; q?: string; type?: string; material?: string; colour?: string }>;
 }) {
   const { locale } = await params;
-  const { brand, q } = await searchParams;
+  const { brand, q, type, material, colour } = await searchParams;
   if (!isLocale(locale)) notFound();
   const loc = locale as Locale;
   const t = getDictionary(loc);
@@ -25,7 +30,7 @@ export default async function ProductsPage({
 
   let query = supabase
     .from('products')
-    .select('id, slug, sku, name_en, name_ur, colour, material, brands(slug, name_en), product_images(storage_path, is_primary)')
+    .select('id, slug, sku, name_en, name_ur, colour, colour_family, material, core_material, product_type, brands(slug, name_en), product_images(storage_path, is_primary)')
     .eq('published', true)
     .eq('archived', false)
     .order('created_at', { ascending: false })
@@ -36,23 +41,60 @@ export default async function ProductsPage({
     if (b) query = query.eq('brand_id', b.id);
   }
   if (q) query = query.or(`name_en.ilike.%${q}%,sku.ilike.%${q}%`);
+  if (type) query = query.eq('product_type', type);
+  if (material) query = query.ilike('core_material', material);
+  if (colour) query = query.eq('colour_family', colour);
 
   const { data: products } = await query;
 
   return (
     <div className="container" style={{ paddingBlock: '2.5rem' }}>
-      <p className="eyebrow">{ur ? 'کلیکشنز' : 'Collections'}</p>
-      <h1 style={{ marginTop: '.3rem' }}>{t.nav.products}</h1>
+      <p className="eyebrow">{ur ? 'کلیکشنز · کیٹلاگ' : 'Collections · Catalogue'}</p>
+      <h1 style={{ marginTop: '.3rem' }}>{ur ? 'ہر سطح کے لیے مواد' : 'Materials for every surface'}</h1>
+      <p style={{ maxWidth: '60ch', color: 'var(--grey)', marginTop: '.7rem' }}>
+        {ur ? 'فریم مولڈنگز، وال پینلز اور آرکیٹیکچرل ٹرِمز کو مواد، رنگ اور استعمال کے مطابق دریافت کریں۔' : 'Explore frame mouldings, wall panels and architectural trims by material, colour and application. Product specifications and current pricing are confirmed by our team.'}
+      </p>
 
-      <form style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap', margin: '1.25rem 0' }}>
+      <div className="catalogue-paths" aria-label={ur ? 'مصنوعات کی اقسام' : 'Browse by collection'}>
+        {[
+          ['ZZMOLDING', ur ? 'فریم مولڈنگز' : 'Frame Mouldings', 'frame_moulding', 'zzmolding'],
+          ['ZZMOLDING', ur ? 'فریمنگ لوازمات' : 'Framing Accessories', 'accessory', 'zzmolding'],
+          ['ZZDECOR', ur ? 'وال پینلز' : 'Wall Panels', 'wall_panel', 'zzdecor'],
+          ['ZZDECOR', ur ? 'ڈبلیو پی سی کلیڈنگ' : 'WPC Cladding', 'cladding', 'zzdecor'],
+          ['ZZDECOR', ur ? 'ماربل اور اونکس' : 'Marble & Onyx', 'sheet', 'zzdecor'],
+          ['ZZDECOR', ur ? 'اسکرٹنگ اور ٹرِمز' : 'Skirting & Trims', 'trim', 'zzdecor']
+        ].map(([division, label, productType, divisionSlug]) => (
+          <Link key={`${division}-${productType}`} href={`${base}/products?brand=${divisionSlug}&type=${productType}`} className="catalogue-path">
+            <span className="catalogue-path__division">{division}</span>
+            <strong>{label}</strong>
+            <span className="catalogue-path__arrow" aria-hidden>↗</span>
+          </Link>
+        ))}
+      </div>
+
+      <form style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 2fr) repeat(2, minmax(150px, 1fr)) auto', gap: '.75rem', alignItems: 'end', margin: '2.5rem 0 1rem' }}>
+        {brand && <input type="hidden" name="brand" value={brand} />}
+        {type && <input type="hidden" name="type" value={type} />}
         <input name="q" defaultValue={q ?? ''} placeholder={t.actions.searchProducts}
           className="admin-input" style={{ maxWidth: 280 }} />
+        <label className="filter-label">{ur ? 'مواد' : 'Material'}
+          <select name="material" defaultValue={material ?? ''} className="admin-input">
+            <option value="">{ur ? 'تمام مواد' : 'All materials'}</option>
+            {['MDF', 'Polystyrene (PS)', 'PVC', 'WPC', 'SPC', 'Marble', 'Onyx', 'Solid wood'].map((v) => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </label>
+        <label className="filter-label">{ur ? 'رنگ' : 'Colour'}
+          <select name="colour" defaultValue={colour ?? ''} className="admin-input">
+            <option value="">{ur ? 'تمام رنگ' : 'All colours'}</option>
+            {['White', 'Off-white / ivory', 'Grey', 'Charcoal', 'Black', 'Natural oak', 'Walnut', 'Gold', 'Silver / chrome', 'Bronze', 'Marble white', 'Onyx'].map((v) => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </label>
         <button className="btn-primary">{t.actions.searchProducts}</button>
         <Link href={`${base}/products`} className="btn-secondary">{t.actions.clearFilters}</Link>
       </form>
-      <div style={{ display: 'flex', gap: '.5rem', marginBottom: '1.75rem' }}>
-        <Link href={`${base}/products?brand=zzmolding`} className="btn-secondary">ZZMOLDING</Link>
-        <Link href={`${base}/products?brand=zzdecor`} className="btn-secondary">ZZDECOR</Link>
+      <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap', marginBottom: '1.75rem' }}>
+        <Link href={`${base}/products?brand=zzmolding`} className="btn-secondary">All ZZMOLDING</Link>
+        <Link href={`${base}/products?brand=zzdecor`} className="btn-secondary">All ZZDECOR</Link>
       </div>
 
       {(!products || products.length === 0) ? (

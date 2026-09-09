@@ -118,6 +118,41 @@ h1, h2, h3, .display {
 
 .container { max-width: var(--maxw); margin-inline: auto; padding-inline: 1.25rem; }
 
+/* Catalogue navigation: a compact, editorial alternative to a generic card grid. */
+.catalogue-paths {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem;
+  margin-top: 2rem;
+}
+.catalogue-path {
+  position: relative;
+  display: grid;
+  gap: .35rem;
+  min-height: 108px;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--zz-antique-gold);
+  background: var(--zz-gallery-white);
+  color: var(--zz-text-dark);
+  text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.catalogue-path:hover { transform: translateY(-2px); border-color: var(--zz-antique-gold); box-shadow: 0 12px 28px -22px rgba(38,33,26,.65); }
+.catalogue-path__division { color: var(--zz-aged-bronze); font-size: .68rem; font-weight: 800; letter-spacing: .16em; }
+.catalogue-path strong { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; }
+.catalogue-path__arrow { position: absolute; inset-inline-end: 1rem; bottom: .9rem; color: var(--zz-aged-bronze); font-size: 1.2rem; }
+.filter-label { display: grid; gap: .35rem; color: var(--zz-text-muted-dark); font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.filter-label .admin-input { min-width: 0; font-size: .88rem; }
+
+@media (max-width: 900px) {
+  .catalogue-paths { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .catalogue-paths { grid-template-columns: 1fr; }
+  .filter-label { font-size: .7rem; }
+}
+
 /* ---- Buttons: architectural, restrained ---- */
 .btn-primary {
   display: inline-block;
