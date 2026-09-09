@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase-server";
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 import { primaryImage } from "@/lib/media";
 import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
+import { CATALOGUE_CATEGORIES, categoryPath } from "@/lib/catalogue/categories";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +35,21 @@ export default async function ProductsPage({
   const t = getDictionary(loc);
   const ur = loc === "ur";
   const base = `/${loc}`;
+
+  const legacyCategory =
+    CATALOGUE_CATEGORIES.find((category) => {
+      if (!category.fallback || category.division !== brand) return false;
+      return category.fallback.productType === type;
+    }) ??
+    (brand === "zzdecor" && type === "wall_panel"
+      ? CATALOGUE_CATEGORIES.find((category) => category.slug === "wall-panels")
+      : undefined) ??
+    (brand === "zzdecor" && type === "sheet"
+      ? CATALOGUE_CATEGORIES.find(
+          (category) => category.slug === "marble-onyx-panels",
+        )
+      : undefined);
+  if (legacyCategory) redirect(categoryPath(loc, legacyCategory.slug));
 
   const supabase = await createClient();
 
@@ -85,51 +102,16 @@ export default async function ProductsPage({
           className="catalogue-paths"
           aria-label={ur ? "مصنوعات کی اقسام" : "Browse by collection"}
         >
-          {[
-            [
-              "ZZMOLDING",
-              ur ? "فریم مولڈنگز" : "Frame Mouldings",
-              "frame_moulding",
-              "zzmolding",
-            ],
-            [
-              "ZZMOLDING",
-              ur ? "فریمنگ لوازمات" : "Framing Accessories",
-              "accessory",
-              "zzmolding",
-            ],
-            [
-              "ZZDECOR",
-              ur ? "وال پینلز" : "Wall Panels",
-              "wall_panel",
-              "zzdecor",
-            ],
-            [
-              "ZZDECOR",
-              ur ? "ڈبلیو پی سی کلیڈنگ" : "WPC Cladding",
-              "cladding",
-              "zzdecor",
-            ],
-            [
-              "ZZDECOR",
-              ur ? "ماربل اور اونکس" : "Marble & Onyx",
-              "sheet",
-              "zzdecor",
-            ],
-            [
-              "ZZDECOR",
-              ur ? "اسکرٹنگ اور ٹرِمز" : "Skirting & Trims",
-              "trim",
-              "zzdecor",
-            ],
-          ].map(([division, label, productType, divisionSlug]) => (
+          {CATALOGUE_CATEGORIES.map((category) => (
             <Link
-              key={`${division}-${productType}`}
-              href={`${base}/products?brand=${divisionSlug}&type=${productType}`}
+              key={category.slug}
+              href={categoryPath(loc, category.slug)}
               className="catalogue-path"
             >
-              <span className="catalogue-path__division">{division}</span>
-              <strong>{label}</strong>
+              <span className="catalogue-path__division">
+                {category.division.toUpperCase()}
+              </span>
+              <strong>{category.name[loc]}</strong>
               <span className="catalogue-path__arrow" aria-hidden>
                 ↗
               </span>

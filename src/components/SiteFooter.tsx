@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getDictionary, type Locale } from "@/lib/i18n";
+import { categoryPath } from "@/lib/catalogue/categories";
 
 export default function SiteFooter({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
@@ -13,8 +14,14 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
       href: `${base}/products`,
       label: ur ? "تمام کلیکشنز" : "All collections",
     },
-    { href: `${base}/products/zzmolding`, label: "ZZMOLDING" },
-    { href: `${base}/products/zzdecor`, label: "ZZDECOR" },
+    {
+      href: categoryPath(locale, "frame-mouldings"),
+      label: ur ? "فریم مولڈنگز" : "Frame Mouldings",
+    },
+    {
+      href: categoryPath(locale, "wall-panels"),
+      label: ur ? "وال پینلز" : "Wall Panels",
+    },
     { href: `${base}/gallery`, label: ur ? "پراجیکٹس" : "Projects" },
     { href: `${base}/about`, label: t.nav.about },
     { href: `${base}/faqs`, label: t.nav.faqs },

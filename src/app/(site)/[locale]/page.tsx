@@ -3,6 +3,7 @@ import { isLocale, type Locale } from "@/lib/i18n";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import HeroVideo from "@/components/HeroVideo";
 import { notFound } from "next/navigation";
+import { CATALOGUE_CATEGORIES, categoryPath } from "@/lib/catalogue/categories";
 
 export default async function Home({
   params,
@@ -15,32 +16,10 @@ export default async function Home({
   const ur = loc === "ur";
   const base = `/${loc}`;
 
-  const collections = [
-    [
-      ur ? "فریم مولڈنگز" : "Frame Mouldings",
-      `${base}/products?brand=zzmolding&type=frame_moulding`,
-    ],
-    [
-      ur ? "فریمنگ لوازمات" : "Framing Accessories",
-      `${base}/products?brand=zzmolding&type=accessory`,
-    ],
-    [
-      ur ? "وال پینلز" : "Wall Panels",
-      `${base}/products?brand=zzdecor&type=wall_panel`,
-    ],
-    [
-      ur ? "ڈبلیو پی سی کلیڈنگ" : "WPC Cladding",
-      `${base}/products?brand=zzdecor&type=cladding`,
-    ],
-    [
-      ur ? "ماربل اور اونکس" : "Marble & Onyx Surfaces",
-      `${base}/products?brand=zzdecor&type=sheet`,
-    ],
-    [
-      ur ? "اسکرٹنگ اور ٹرِمز" : "Skirting & Architectural Trims",
-      `${base}/products?brand=zzdecor&type=trim`,
-    ],
-  ];
+  const collections = CATALOGUE_CATEGORIES.map((category) => [
+    category.name[loc],
+    categoryPath(loc, category.slug),
+  ]);
 
   const stats = [
     ur ? "۲۰۰ سے زائد ڈیزائنز" : "200+ curated designs",

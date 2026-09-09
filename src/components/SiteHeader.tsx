@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getDictionary, type Locale } from "@/lib/i18n";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { categoryPath } from "@/lib/catalogue/categories";
 
 export default function SiteHeader({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
@@ -13,11 +14,11 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
     { href: base, label: t.nav.home },
     { href: `${base}/products`, label: ur ? "کلیکشنز" : "Collections" },
     {
-      href: `${base}/products/zzmolding`,
+      href: categoryPath(locale, "frame-mouldings"),
       label: ur ? "فریم مولڈنگز" : "Mouldings",
     },
     {
-      href: `${base}/products/zzdecor`,
+      href: categoryPath(locale, "wall-panels"),
       label: ur ? "وال پینلز" : "Wall Surfaces",
     },
     { href: `${base}/gallery`, label: ur ? "پراجیکٹس" : "Projects" },

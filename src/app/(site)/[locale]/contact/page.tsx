@@ -13,6 +13,7 @@
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 import ContactForm from "@/components/ContactForm";
 import { notFound } from "next/navigation";
+import { getCategoryBySlug } from "@/lib/catalogue/categories";
 
 export const metadata = { title: "Contact Us" };
 
@@ -26,14 +27,20 @@ export default async function Contact({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ sku?: string }>;
+  searchParams: Promise<{ sku?: string; category?: string }>;
 }) {
   const { locale } = await params;
-  const { sku } = await searchParams;
+  const { sku, category: categorySlug } = await searchParams;
   if (!isLocale(locale)) notFound();
   const loc = locale as Locale;
   const t = getDictionary(loc);
   const ur = loc === "ur";
+  const category = categorySlug ? getCategoryBySlug(categorySlug) : undefined;
+  const categoryMessage = category
+    ? ur
+      ? `${category.name.ur} کے موجودہ کیٹلاگ، دستیابی اور قیمت کے بارے میں معلومات درکار ہیں۔`
+      : `I would like the current ${category.name.en} catalogue, availability and quotation.`
+    : undefined;
 
   return (
     <>
@@ -135,7 +142,13 @@ export default async function Contact({
           >
             {t.actions.requestQuote}
           </h2>
-          <ContactForm locale={loc} dict={t} sku={sku} />
+          <ContactForm
+            locale={loc}
+            dict={t}
+            sku={sku}
+            interest={category?.division}
+            message={categoryMessage}
+          />
         </div>
       </div>
     </>
