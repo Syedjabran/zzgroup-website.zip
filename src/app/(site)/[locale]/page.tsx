@@ -4,6 +4,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import HeroVideo from "@/components/HeroVideo";
 import { notFound } from "next/navigation";
 import { CATALOGUE_CATEGORIES, categoryPath } from "@/lib/catalogue/categories";
+import { DIVISIONS, divisionPath } from "@/lib/catalogue/divisions";
 
 export default async function Home({
   params,
@@ -102,9 +103,9 @@ export default async function Home({
             <HeroVideo opacity={0.78} />
             <div className="atelier-hero__stamp">
               <strong>
-                {ur ? "دو مخصوص برانڈز" : "Two specialist divisions"}
+                {ur ? "تین مخصوص ڈویژنز" : "Three specialist divisions"}
               </strong>
-              <span>ZZMOLDING · ZZDECOR</span>
+              <span>ZZMOLDING · ZZDECOR · ZZINDUSTRIES</span>
             </div>
           </div>
         </div>
@@ -157,54 +158,31 @@ export default async function Home({
       </section>
 
       <section
-        className="atelier-brand-grid"
-        aria-label={ur ? "زیڈ زی گروپ کے برانڈز" : "ZZ Group divisions"}
+        className="atelier-brand-grid atelier-brand-grid--three"
+        aria-label={ur ? "زیڈ زی گروپ کے ڈویژنز" : "ZZ Group divisions"}
       >
-        <article className="atelier-brand">
-          <div>
-            <p
-              className="atelier-section-label"
-              style={{ color: "var(--atelier-brass-light)" }}
+        {DIVISIONS.map((division) => (
+          <article className="atelier-brand" key={division.slug}>
+            <div>
+              <p
+                className="atelier-section-label"
+                style={{ color: "var(--atelier-brass-light)" }}
+              >
+                {division.wordmark}
+              </p>
+              <h3>{division.tagline[loc]}</h3>
+              <p>{division.intro[loc]}</p>
+            </div>
+            <Link
+              href={divisionPath(loc, division.slug)}
+              className="atelier-btn atelier-btn--ghost"
             >
-              ZZMOLDING
-            </p>
-            <h3>
-              {ur ? "فریم کو فن میں بدلیں۔" : "Make the frame part of the art."}
-            </h3>
-            <p>
               {ur
-                ? "پیشہ ورانہ فریمنگ کے لیے پروفائلز، فنشز اور لوازمات۔"
-                : "Profiles, finishes and accessories selected for professional framers, galleries, retailers and wholesale buyers."}
-            </p>
-          </div>
-          <Link
-            href={`${base}/products/zzmolding`}
-            className="atelier-btn atelier-btn--ghost"
-          >
-            {ur ? "مولڈنگز دیکھیں" : "Explore mouldings"}
-          </Link>
-        </article>
-        <article className="atelier-brand">
-          <div>
-            <p className="atelier-section-label">ZZDECOR</p>
-            <h3>
-              {ur
-                ? "دیوار کو سطح سے آگے لے جائیں۔"
-                : "Turn walls into architecture."}
-            </h3>
-            <p>
-              {ur
-                ? "جدید انٹیریئرز کے لیے پینلز، کلیڈنگ اور آرکیٹیکچرل ٹرِمز۔"
-                : "Wall panels, cladding, statement sheets and architectural trims for residential, commercial and hospitality interiors."}
-            </p>
-          </div>
-          <Link
-            href={`${base}/products/zzdecor`}
-            className="atelier-btn atelier-btn--ghost"
-          >
-            {ur ? "سطحیں دیکھیں" : "Explore surfaces"}
-          </Link>
-        </article>
+                ? `${division.name.ur} دیکھیں`
+                : `Explore ${division.name.en}`}
+            </Link>
+          </article>
+        ))}
       </section>
 
       <section className="atelier-section atelier-section--olive">

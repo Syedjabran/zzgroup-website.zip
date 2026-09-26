@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getDictionary, type Locale } from "@/lib/i18n";
-import { categoryPath } from "@/lib/catalogue/categories";
+import { DIVISIONS, divisionPath } from "@/lib/catalogue/divisions";
 
 export default function SiteFooter({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
@@ -12,16 +12,12 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
     { href: base, label: t.nav.home },
     {
       href: `${base}/products`,
-      label: ur ? "تمام کلیکشنز" : "All collections",
+      label: ur ? "تمام پروڈکٹس" : "All products",
     },
-    {
-      href: categoryPath(locale, "frame-mouldings"),
-      label: ur ? "فریم مولڈنگز" : "Frame Mouldings",
-    },
-    {
-      href: categoryPath(locale, "wall-panels"),
-      label: ur ? "وال پینلز" : "Wall Panels",
-    },
+    ...DIVISIONS.map((d) => ({
+      href: divisionPath(locale, d.slug),
+      label: d.name[locale],
+    })),
     { href: `${base}/gallery`, label: ur ? "پراجیکٹس" : "Projects" },
     { href: `${base}/about`, label: t.nav.about },
     { href: `${base}/faqs`, label: t.nav.faqs },
@@ -43,8 +39,8 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
           </p>
           <p style={{ maxWidth: "38ch" }}>
             {ur
-              ? "زیڈ زی مولڈنگ اور زیڈ زی ڈیکور — پاکستان بھر میں فریمنگ اور آرکیٹیکچرل سطحوں کے لیے ایک قابلِ اعتماد ذریعہ۔"
-              : "ZZMOLDING and ZZDECOR — one dependable source for professional framing and architectural surfaces across Pakistan."}
+              ? "زیڈ زی مولڈنگ، زیڈ زی ڈیکور اور زیڈ زی انڈسٹریز — پاکستان بھر میں فریمنگ، آرکیٹیکچرل سطحوں اور مینوفیکچرنگ کے لیے ایک قابلِ اعتماد گروپ۔"
+              : "ZZMOLDING, ZZDECOR and ZZINDUSTRIES — one dependable group for professional framing, architectural surfaces and manufacturing across Pakistan."}
           </p>
           <Link
             href={`${base}/contact`}

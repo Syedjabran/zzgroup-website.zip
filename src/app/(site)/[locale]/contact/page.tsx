@@ -14,6 +14,8 @@ import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 import ContactForm from "@/components/ContactForm";
 import { notFound } from "next/navigation";
 import { getCategoryBySlug } from "@/lib/catalogue/categories";
+import { DIVISIONS, divisionPath } from "@/lib/catalogue/divisions";
+import Link from "next/link";
 
 export const metadata = { title: "Contact Us" };
 
@@ -149,6 +151,63 @@ export default async function Contact({
             interest={category?.division}
             message={categoryMessage}
           />
+        </div>
+      </div>
+
+      <div className="container page-content">
+        <p className="atelier-section-label">
+          {ur ? "ہماری برانچز" : "Our branches"}
+        </p>
+        <h2
+          style={{
+            fontSize: "clamp(1.8rem,3.5vw,3rem)",
+            lineHeight: 1.05,
+            margin: ".6rem 0 1.75rem",
+          }}
+        >
+          {ur ? "ہر ڈویژن کا اپنا رابطہ۔" : "A dedicated contact for each division."}
+        </h2>
+        <div className="atelier-brand-grid" style={{ marginTop: 0 }}>
+          {DIVISIONS.map((division) => (
+            <article className="atelier-brand" key={division.slug}>
+              <div>
+                <p
+                  className="atelier-section-label"
+                  style={{ color: "var(--atelier-brass-light)" }}
+                >
+                  {division.wordmark}
+                </p>
+                <h3>{division.name[loc]}</h3>
+                <p style={{ lineHeight: 1.9 }}>
+                  <span className="ltr">{division.branch.address[loc]}</span>
+                  <br />
+                  <a
+                    href={`tel:${division.branch.phoneDial}`}
+                    className="ltr"
+                    dir="ltr"
+                  >
+                    {division.branch.phoneDisplay}
+                  </a>
+                  <br />
+                  <a
+                    href={`mailto:${division.branch.email}`}
+                    className="ltr"
+                    dir="ltr"
+                  >
+                    {division.branch.email}
+                  </a>
+                </p>
+              </div>
+              <Link
+                href={divisionPath(loc, division.slug)}
+                className="atelier-btn atelier-btn--ghost"
+              >
+                {ur
+                  ? `${division.name.ur} دیکھیں`
+                  : `Explore ${division.name.en}`}
+              </Link>
+            </article>
+          ))}
         </div>
       </div>
     </>

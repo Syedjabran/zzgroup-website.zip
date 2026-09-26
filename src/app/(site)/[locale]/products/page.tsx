@@ -1,21 +1,22 @@
 import Link from "next/link";
-import Image from "next/image";
-import { createClient } from "@/lib/supabase-server";
-import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
-import { primaryImage } from "@/lib/media";
-import { notFound } from "next/navigation";
-import { redirect } from "next/navigation";
+import { isLocale, type Locale } from "@/lib/i18n";
+import { notFound, redirect } from "next/navigation";
 import { CATALOGUE_CATEGORIES, categoryPath } from "@/lib/catalogue/categories";
+import {
+  DIVISIONS,
+  categoriesForDivision,
+  divisionPath,
+} from "@/lib/catalogue/divisions";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Collections | Frame Mouldings & Wall Panels Pakistan",
+  title: "Products — ZZ Moulding · ZZ Decor · ZZ Industries",
   description:
-    "Browse ZZ Group frame mouldings, framing supplies, wall panels, WPC cladding, decorative surfaces and architectural trims across Pakistan.",
+    "Choose a ZZ Group division: ZZ Moulding (frame mouldings & framing supplies), ZZ Decor (wall panels, WPC cladding & architectural surfaces) or ZZ Industries (manufacturing). Each division has its own catalogue and branch contact.",
 };
 
-export default async function ProductsPage({
+export default async function ProductsGateway({
   params,
   searchParams,
 }: {
@@ -24,18 +25,15 @@ export default async function ProductsPage({
     brand?: string;
     q?: string;
     type?: string;
-    material?: string;
-    colour?: string;
   }>;
 }) {
   const { locale } = await params;
-  const { brand, q, type, material, colour } = await searchParams;
+  const { brand, type } = await searchParams;
   if (!isLocale(locale)) notFound();
   const loc = locale as Locale;
-  const t = getDictionary(loc);
   const ur = loc === "ur";
-  const base = `/${loc}`;
 
+  // Preserve legacy deep links (?brand=&type=) → canonical category routes.
   const legacyCategory =
     CATALOGUE_CATEGORIES.find((category) => {
       if (!category.fallback || category.division !== brand) return false;
@@ -50,33 +48,10 @@ export default async function ProductsPage({
         )
       : undefined);
   if (legacyCategory) redirect(categoryPath(loc, legacyCategory.slug));
-
-  const supabase = await createClient();
-
-  let query = supabase
-    .from("products")
-    .select(
-      "id, slug, sku, name_en, name_ur, colour, colour_family, material, core_material, product_type, brands(slug, name_en), product_images(storage_path, is_primary)",
-    )
-    .eq("published", true)
-    .eq("archived", false)
-    .order("created_at", { ascending: false })
-    .limit(60);
-
-  if (brand) {
-    const { data: b } = await supabase
-      .from("brands")
-      .select("id")
-      .eq("slug", brand)
-      .single();
-    if (b) query = query.eq("brand_id", b.id);
+  // Bare brand deep link → the division page.
+  if (brand && DIVISIONS.some((d) => d.slug === brand)) {
+    redirect(divisionPath(loc, brand));
   }
-  if (q) query = query.or(`name_en.ilike.%${q}%,sku.ilike.%${q}%`);
-  if (type) query = query.eq("product_type", type);
-  if (material) query = query.ilike("core_material", material);
-  if (colour) query = query.eq("colour_family", colour);
-
-  const { data: products } = await query;
 
   return (
     <>
@@ -86,199 +61,82 @@ export default async function ProductsPage({
             className="atelier-section-label"
             style={{ color: "var(--atelier-brass-light)" }}
           >
-            {ur ? "کلیکشنز · کیٹلاگ" : "Collections · Catalogue"}
+            {ur ? "پروڈکٹس · ڈویژنز" : "Products · Divisions"}
           </p>
-          <h1>{ur ? "ہر سطح کے لیے مواد" : "Materials for every surface."}</h1>
+          <h1>{ur ? "اپنی ڈویژن منتخب کریں۔" : "Choose your division."}</h1>
           <p>
             {ur
-              ? "فریم مولڈنگز، وال پینلز اور آرکیٹیکچرل ٹرِمز کو مواد، رنگ اور استعمال کے مطابق دریافت کریں۔"
-              : "Explore frame mouldings, wall panels and architectural trims by material, colour and application. Specifications and current pricing are confirmed by our team."}
+              ? "ہر ڈویژن کا اپنا کیٹلاگ اور برانچ رابطہ ہے۔ متعلقہ ڈویژن منتخب کریں تاکہ صرف اُسی کی مصنوعات دکھائی دیں۔"
+              : "Each division has its own catalogue and branch contact. Pick a division to see only its products, organised by category."}
           </p>
         </div>
       </section>
 
       <div className="container page-content">
         <div
-          className="catalogue-paths"
-          aria-label={ur ? "مصنوعات کی اقسام" : "Browse by collection"}
+          className="atelier-brand-grid atelier-brand-grid--three"
+          style={{ marginTop: 0 }}
         >
-          {CATALOGUE_CATEGORIES.map((category) => (
-            <Link
-              key={category.slug}
-              href={categoryPath(loc, category.slug)}
-              className="catalogue-path"
-            >
-              <span className="catalogue-path__division">
-                {category.division.toUpperCase()}
-              </span>
-              <strong>{category.name[loc]}</strong>
-              <span className="catalogue-path__arrow" aria-hidden>
-                ↗
-              </span>
-            </Link>
-          ))}
-        </div>
-
-        <form className="catalogue-filters">
-          {brand && <input type="hidden" name="brand" value={brand} />}
-          {type && <input type="hidden" name="type" value={type} />}
-          <input
-            name="q"
-            defaultValue={q ?? ""}
-            placeholder={t.actions.searchProducts}
-            className="admin-input"
-            style={{ maxWidth: 280 }}
-          />
-          <label className="filter-label">
-            {ur ? "مواد" : "Material"}
-            <select
-              name="material"
-              defaultValue={material ?? ""}
-              className="admin-input"
-            >
-              <option value="">{ur ? "تمام مواد" : "All materials"}</option>
-              {[
-                "MDF",
-                "Polystyrene (PS)",
-                "PVC",
-                "WPC",
-                "SPC",
-                "Marble",
-                "Onyx",
-                "Solid wood",
-              ].map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="filter-label">
-            {ur ? "رنگ" : "Colour"}
-            <select
-              name="colour"
-              defaultValue={colour ?? ""}
-              className="admin-input"
-            >
-              <option value="">{ur ? "تمام رنگ" : "All colours"}</option>
-              {[
-                "White",
-                "Off-white / ivory",
-                "Grey",
-                "Charcoal",
-                "Black",
-                "Natural oak",
-                "Walnut",
-                "Gold",
-                "Silver / chrome",
-                "Bronze",
-                "Marble white",
-                "Onyx",
-              ].map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button className="btn-primary">{t.actions.searchProducts}</button>
-          <Link href={`${base}/products`} className="btn-secondary">
-            {t.actions.clearFilters}
-          </Link>
-        </form>
-        <div
-          style={{
-            display: "flex",
-            gap: ".5rem",
-            flexWrap: "wrap",
-            marginBottom: "1.75rem",
-          }}
-        >
-          <Link
-            href={`${base}/products?brand=zzmolding`}
-            className="btn-secondary"
-          >
-            All ZZMOLDING
-          </Link>
-          <Link
-            href={`${base}/products?brand=zzdecor`}
-            className="btn-secondary"
-          >
-            All ZZDECOR
-          </Link>
-        </div>
-
-        {!products || products.length === 0 ? (
-          <p style={{ color: "var(--grey)" }}>
-            {ur
-              ? "ابھی کوئی مصنوعات دستیاب نہیں۔ جلد شامل کی جائیں گی۔"
-              : "No products to show yet. New products are added regularly — please check back or contact us."}
-          </p>
-        ) : (
-          <div className="product-grid">
-            {products.map((p: any) => {
-              const img = primaryImage(p.product_images);
-              return (
-                <Link
-                  key={p.id}
-                  href={`${base}/products/${p.slug}`}
-                  className="product-card"
-                >
-                  <div className="product-card__image">
-                    {img ? (
-                      <Image
-                        src={img}
-                        alt={p.name_en}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 25vw"
-                        style={{ objectFit: "cover" }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          position: "absolute",
-                          inset: 0,
-                          display: "grid",
-                          placeItems: "center",
-                          color: "var(--grey)",
-                          fontSize: ".8rem",
-                        }}
-                      >
-                        {ur ? "تصویر جلد" : "Image coming soon"}
-                      </div>
-                    )}
-                  </div>
-                  <div className="product-card__copy">
-                    <p
-                      style={{
-                        fontSize: ".72rem",
-                        color: "var(--zz-aged-bronze)",
-                        margin: 0,
-                        letterSpacing: ur ? 0 : ".1em",
-                        textTransform: ur ? "none" : "uppercase",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {p.brands?.name_en}
-                    </p>
-                    <strong style={{ display: "block", marginTop: ".2rem" }}>
-                      {ur && p.name_ur ? p.name_ur : p.name_en}
-                    </strong>
+          {DIVISIONS.map((division) => {
+            const categories = categoriesForDivision(division.slug);
+            return (
+              <article className="atelier-brand" key={division.slug}>
+                <div>
+                  <p
+                    className="atelier-section-label"
+                    style={{ color: "var(--atelier-brass-light)" }}
+                  >
+                    {division.wordmark}
+                  </p>
+                  <h3>{division.tagline[loc]}</h3>
+                  <p>{division.intro[loc]}</p>
+                  {categories.length > 0 ? (
+                    <ul className="division-gateway__cats">
+                      {categories.map((category) => (
+                        <li key={category.slug}>
+                          <Link href={categoryPath(loc, category.slug)}>
+                            {category.name[loc]}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
                     <p
                       style={{
                         color: "var(--grey)",
-                        fontSize: ".83rem",
-                        margin: ".25rem 0 0",
+                        fontSize: ".85rem",
+                        marginTop: ".75rem",
                       }}
                     >
-                      SKU: <span className="ltr">{p.sku}</span>
+                      {ur
+                        ? "کیٹلاگ تیاری میں — تفصیل کے لیے رابطہ کریں۔"
+                        : "Catalogue in preparation — contact us for details."}
                     </p>
-                  </div>
+                  )}
+                  <p
+                    style={{
+                      color: "var(--grey)",
+                      fontSize: ".85rem",
+                      marginTop: ".75rem",
+                    }}
+                  >
+                    <span className="ltr">{division.branch.phoneDisplay}</span>
+                    <span aria-hidden style={{ opacity: 0.4 }}> · </span>
+                    <span className="ltr">{division.branch.address[loc]}</span>
+                  </p>
+                </div>
+                <Link
+                  href={divisionPath(loc, division.slug)}
+                  className="atelier-btn atelier-btn--ghost"
+                >
+                  {ur
+                    ? `${division.name.ur} دیکھیں`
+                    : `Explore ${division.name.en}`}
                 </Link>
-              );
-            })}
-          </div>
-        )}
+              </article>
+            );
+          })}
+        </div>
       </div>
     </>
   );

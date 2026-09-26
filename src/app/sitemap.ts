@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { CATALOGUE_CATEGORIES, categoryPath } from "@/lib/catalogue/categories";
+import { DIVISIONS, divisionPath } from "@/lib/catalogue/divisions";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.zzgroup.biz";
 
@@ -43,5 +44,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   );
 
-  return [...staticEntries, ...categoryEntries];
+  const divisionEntries = DIVISIONS.flatMap((division) =>
+    (["en", "ur"] as const).map((locale) => ({
+      url: `${SITE_URL}${divisionPath(locale, division.slug)}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}${divisionPath("en", division.slug)}`,
+          ur: `${SITE_URL}${divisionPath("ur", division.slug)}`,
+        },
+      },
+    })),
+  );
+
+  return [...staticEntries, ...divisionEntries, ...categoryEntries];
 }

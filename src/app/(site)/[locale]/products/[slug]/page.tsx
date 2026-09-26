@@ -10,8 +10,37 @@ import {
   priceLabel,
   humanise,
 } from "@/app/(admin)/admin/products/catalogue-options";
+import { getDivisionBySlug } from "@/lib/catalogue/divisions";
+import DivisionLandingPage from "@/components/catalogue/DivisionLandingPage";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  if (!isLocale(locale)) return {};
+  const loc = locale as Locale;
+  const division = getDivisionBySlug(slug);
+  if (division) {
+    const canonical = `/${loc}/products/${division.slug}`;
+    return {
+      title: division.seoTitle[loc],
+      description: division.seoDescription[loc],
+      alternates: {
+        canonical,
+        languages: {
+          en: `/en/products/${division.slug}`,
+          ur: `/ur/products/${division.slug}`,
+          "x-default": `/en/products/${division.slug}`,
+        },
+      },
+    };
+  }
+  return {};
+}
 
 export default async function ProductOrBrand({
   params,
@@ -24,6 +53,13 @@ export default async function ProductOrBrand({
   const t = getDictionary(loc);
   const ur = loc === "ur";
   const base = `/${loc}`;
+
+  // Division landing (branch page: catalogue + branch contact)
+  const division = getDivisionBySlug(slug);
+  if (division) {
+    return <DivisionLandingPage division={division} locale={loc} />;
+  }
+
   const supabase = await createClient();
 
   // Brand landing

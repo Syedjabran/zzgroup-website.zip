@@ -22,6 +22,12 @@ const categories = [
 const requiredPaths = (locale: "en" | "ur") =>
   categories.map(({ slug }) => `/${locale}/collections/${slug}`);
 
+const divisions = [
+  { slug: "zzmolding", h1: "ZZ Moulding", phone: "0333 4813016" },
+  { slug: "zzdecor", h1: "ZZ Decor", phone: "0337 4813016" },
+  { slug: "zzindustries", h1: "ZZ Industries", phone: "0319 483016" },
+] as const;
+
 async function canonicalPath(page: Page): Promise<string> {
   const href = await page.locator('link[rel="canonical"]').getAttribute("href");
   expect(href, "page must publish a canonical link").toBeTruthy();
@@ -184,6 +190,39 @@ test.describe("structured data contract", () => {
           }),
         ]),
       );
+    }
+  });
+});
+
+test.describe("division gateway contract", () => {
+  test("products gateway exposes the three business divisions", async ({
+    page,
+  }) => {
+    await page.goto(`${baseUrl}/en/products`, { waitUntil: "domcontentloaded" });
+
+    for (const division of divisions) {
+      await expect(
+        page.locator(`main a[href="/en/products/${division.slug}"]`).first(),
+      ).toBeVisible();
+    }
+  });
+
+  test("each division has its own catalogue context and branch contact", async ({
+    page,
+  }) => {
+    for (const division of divisions) {
+      const path = `/en/products/${division.slug}`;
+      const response = await page.goto(`${baseUrl}${path}`, {
+        waitUntil: "domcontentloaded",
+      });
+
+      expect(response?.status(), path).toBe(200);
+      await expect(page.locator("h1")).toHaveText(division.h1);
+      await expect(page.locator(".division-tabs a")).toHaveCount(3);
+      await expect(page.locator(".division-contact")).toContainText(
+        division.phone,
+      );
+      expect(await canonicalPath(page)).toBe(path);
     }
   });
 });

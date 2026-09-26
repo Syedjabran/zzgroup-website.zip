@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getDictionary, type Locale } from "@/lib/i18n";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { categoryPath } from "@/lib/catalogue/categories";
+import { DIVISIONS, divisionPath } from "@/lib/catalogue/divisions";
 
 export default function SiteHeader({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
@@ -12,15 +12,6 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
 
   const nav = [
     { href: base, label: t.nav.home },
-    { href: `${base}/products`, label: ur ? "کلیکشنز" : "Collections" },
-    {
-      href: categoryPath(locale, "frame-mouldings"),
-      label: ur ? "فریم مولڈنگز" : "Mouldings",
-    },
-    {
-      href: categoryPath(locale, "wall-panels"),
-      label: ur ? "وال پینلز" : "Wall Surfaces",
-    },
     { href: `${base}/gallery`, label: ur ? "پراجیکٹس" : "Projects" },
     { href: `${base}/about`, label: t.nav.about },
     { href: `${base}/contact`, label: t.nav.contact },
@@ -63,7 +54,37 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
             className="site-nav__links"
             aria-label={ur ? "مرکزی نیویگیشن" : "Primary navigation"}
           >
-            {nav.map((item) => (
+            <Link href={base} className="site-nav__link">
+              {t.nav.home}
+            </Link>
+
+            <div className="nav-dropdown">
+              <Link
+                href={`${base}/products`}
+                className="site-nav__link nav-dropdown__trigger"
+                aria-haspopup="true"
+              >
+                {t.nav.products ?? (ur ? "پروڈکٹس" : "Products")}
+                <span className="nav-dropdown__caret" aria-hidden>
+                  ▾
+                </span>
+              </Link>
+              <div className="nav-dropdown__panel" role="menu">
+                {DIVISIONS.map((d) => (
+                  <Link
+                    key={d.slug}
+                    href={divisionPath(locale, d.slug)}
+                    className="nav-dropdown__item"
+                    role="menuitem"
+                  >
+                    <strong>{d.name[locale]}</strong>
+                    <span>{d.tagline[locale]}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {nav.slice(1).map((item) => (
               <Link key={item.href} href={item.href} className="site-nav__link">
                 {item.label}
               </Link>
